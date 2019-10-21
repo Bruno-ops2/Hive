@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/PrimaryLight"
+    android:elevation="0dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/image_view_profile_pic"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_margin="8dp"
+        android:src="@drawable/empty_profile_pic" />
+
+    <TextView
+        android:id="@+id/text_view_fragment_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:fontFamily="@font/lato_bold"
+        android:text="Fragment"
+        android:textColor="@color/PrimaryDark"
+        android:textSize="22sp" />
+
+    <ImageView
+        android:id="@+id/image_view_dark_mode"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="end"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_dark_mode" />
+
+    <ImageView
+        android:id="@+id/image_view_light_mode"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="end"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_light_mode"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/image_view_new_chat"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="end"
+        android:src="@drawable/ic_pen" />
+
+</androidx.appcompat.widget.Toolbar>

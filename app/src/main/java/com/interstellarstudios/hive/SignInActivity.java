@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,6 +31,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.interstellarstudios.hive.firestore.GetData;
+import com.interstellarstudios.hive.repository.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,11 +59,14 @@ public class SignInActivity extends AppCompatActivity {
     private FirebaseAuth mFireBaseAuth;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
+    private Repository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        repository = new Repository(getApplication());
 
         androidUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -122,10 +129,10 @@ public class SignInActivity extends AppCompatActivity {
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.Primary));
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.Primary));
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
         boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
@@ -169,7 +176,7 @@ public class SignInActivity extends AppCompatActivity {
     private void lightMode() {
 
         if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.Primary));
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
         imageViewLightMode.setVisibility(View.GONE);
@@ -177,13 +184,13 @@ public class SignInActivity extends AppCompatActivity {
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_dark);
 
-        editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.DarkText));
-        editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.DarkText));
-        editTextPassword.setTextColor(ContextCompat.getColor(context, R.color.DarkText));
-        editTextPassword.setHintTextColor(ContextCompat.getColor(context, R.color.DarkText));
+        editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        editTextPassword.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        editTextPassword.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
-        textViewRegister.setTextColor(ContextCompat.getColor(context, R.color.DarkText));
-        textViewForgotPassword.setTextColor(ContextCompat.getColor(context, R.color.DarkText));
+        textViewRegister.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        textViewForgotPassword.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
@@ -218,17 +225,17 @@ public class SignInActivity extends AppCompatActivity {
                 .duration(500)
                 .playOn(textViewForgotPassword2);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.Primary));
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.Primary));
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
     }
 
     private void darkMode() {
 
         if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryDarkTheme));
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         }
 
         imageViewDarkMode.setVisibility(View.GONE);
@@ -236,13 +243,13 @@ public class SignInActivity extends AppCompatActivity {
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_light);
 
-        editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.LightText));
-        editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.LightText));
-        editTextPassword.setTextColor(ContextCompat.getColor(context, R.color.LightText));
-        editTextPassword.setHintTextColor(ContextCompat.getColor(context, R.color.LightText));
+        editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        editTextPassword.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        editTextPassword.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
 
-        textViewRegister.setTextColor(ContextCompat.getColor(context, R.color.LightText));
-        textViewForgotPassword.setTextColor(ContextCompat.getColor(context, R.color.LightText));
+        textViewRegister.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewForgotPassword.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
@@ -277,10 +284,10 @@ public class SignInActivity extends AppCompatActivity {
                 .duration(500)
                 .playOn(textViewForgotPassword2);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryDarkTheme));
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryDarkTheme));
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         }
     }
 
@@ -315,16 +322,18 @@ public class SignInActivity extends AppCompatActivity {
                                     Map<String, Object> userToken = new HashMap<>();
                                     userToken.put("User_Token_ID", deviceToken);
 
-                                    DocumentReference userTokenPath = mFireBaseFireStore.collection(mCurrentUserId).document("User").collection("Tokens").document(androidUUID);
+                                    DocumentReference userTokenPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document(androidUUID);
                                     userTokenPath.set(userToken);
                                 }
                             });
+
+                            GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
 
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(i);
                             finish();
-                            overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                            hideKeyboard(SignInActivity.this);
 
                         } else {
                             Toasty.error(context, "Sign In Error, please try again. Please ensure that your email address and password are correct.", Toast.LENGTH_LONG, true).show();
@@ -341,5 +350,16 @@ public class SignInActivity extends AppCompatActivity {
         startActivity(i);
         finish();
         overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

@@ -43,9 +43,15 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
         <activity
             android:name=".UserNameActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".SearchActivity"
             android:windowSoftInputMode="stateHidden" />
 
         <meta-data
