@@ -2,6 +2,8 @@ package com.interstellarstudios.hive.repository;
 
 import android.app.Application;
 
+import com.interstellarstudios.hive.database.ChatUserDAO;
+import com.interstellarstudios.hive.database.ChatUserEntity;
 import com.interstellarstudios.hive.database.CurrentUserDAO;
 import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.database.HiveDatabase;
@@ -14,12 +16,14 @@ public class Repository {
 
     private UsersDAO usersDAO;
     private CurrentUserDAO currentUserDAO;
+    private ChatUserDAO chatUserDAO;
 
     public Repository(Application application) {
 
         HiveDatabase hiveDatabase = HiveDatabase.getInstance(application);
         usersDAO = hiveDatabase.usersDAO();
         currentUserDAO = hiveDatabase.currentUserDAO();
+        chatUserDAO = hiveDatabase.chatUserDAO();
     }
 
     public void insert(UserEntity userEntity) {
@@ -64,5 +68,25 @@ public class Repository {
 
     public List<CurrentUserEntity> getCurrentUser() {
         return currentUserDAO.getAll();
+    }
+
+    public void insert(ChatUserEntity chatUserEntity) {
+        chatUserDAO.insert(chatUserEntity);
+    }
+
+    public void update(ChatUserEntity chatUserEntity) {
+        chatUserDAO.update(chatUserEntity);
+    }
+
+    public void delete(ChatUserEntity chatUserEntity) {
+        chatUserDAO.delete(chatUserEntity);
+    }
+
+    public void deleteChatUser() {
+        chatUserDAO.deleteAll();
+    }
+
+    public List<ChatUserEntity> getChatUser() {
+        return chatUserDAO.getAll();
     }
 }

@@ -108,6 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             Intent i = new Intent(context, MainActivity.class);
             startActivity(i);
+            finish();
         }
 
         imageViewHiveLogo = findViewById(R.id.image_view_hive_logo);

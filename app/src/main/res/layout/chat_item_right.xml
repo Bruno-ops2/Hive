@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <RelativeLayout
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_pic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/show_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@id/image_view_grey_ticks"
+            android:background="@drawable/rounded_edges"
+            android:backgroundTint="@color/Accent"
+            android:gravity="end"
+            android:padding="8dp"
+            android:text="hello"
+            android:textColor="@color/PrimaryLight"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/text_view_time_stamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/show_message"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_toStartOf="@id/image_view_grey_ticks"
+            android:text="time"
+            android:textSize="10sp" />
+
+        <ImageView
+            android:id="@+id/image_view_blue_ticks"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignTop="@id/show_message"
+            android:layout_alignBottom="@id/show_message"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/blue_ticks" />
+
+        <ImageView
+            android:id="@+id/image_view_grey_ticks"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignTop="@id/show_message"
+            android:layout_alignBottom="@id/show_message"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/grey_ticks" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -3,8 +3,8 @@
     <color name="colorPrimaryDark">#FFFFFF</color>
     <color name="PrimaryLight">#FFFFFF</color>
     <color name="PrimaryDark">#000000</color>
-    <color name="SecondaryLight">#f9f9f9</color>
+    <color name="SecondaryLight">#efefef</color>
     <color name="SecondaryDark">#171717</color>
     <color name="TertiaryDark">#7b7b7b</color>
-    <color name="Accent">#339eff</color>
+    <color name="Accent">#0076e1</color>
 </resources>

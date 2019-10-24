@@ -1,10 +1,14 @@
 package com.interstellarstudios.hive.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -20,19 +24,32 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.R;
+import com.interstellarstudios.hive.SearchActivity;
+import com.interstellarstudios.hive.adapters.UserAdapter;
+import com.interstellarstudios.hive.database.UserEntity;
 import com.interstellarstudios.hive.models.User;
+import com.interstellarstudios.hive.repository.Repository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChatsFragment extends Fragment {
 
     private Context context;
+    private UserAdapter adapter;
+    private RecyclerView recyclerView;
     private ArrayList<String> searchSuggestions = new ArrayList<>();
+    private List<String> usersList = new ArrayList<>();
+    private List<User> mUsers = new ArrayList<>();
     private AutoCompleteTextView searchField;
+    private FirebaseFirestore mFireBaseFireStore;
+    private String mCurrentUserId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,6 +57,17 @@ public class ChatsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
         context = getActivity();
+
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        mFireBaseFireStore = FirebaseFirestore.getInstance();
+        FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            mCurrentUserId = firebaseUser.getUid();
+        }
+
+        recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         searchField = view.findViewById(R.id.searchField);
         searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -57,21 +85,68 @@ public class ChatsFragment extends Fragment {
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
+        readChats();
         setupSearchSuggestions();
 
         return view;
+    }
+
+    private void readChats() {
+
+        CollectionReference chatPath = mFireBaseFireStore.collection("Chats").document(mCurrentUserId).collection("Single");
+        chatPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+
+                usersList.clear();
+
+                for (QueryDocumentSnapshot doc : value) {
+                    usersList.add(doc.getId());
+                }
+                readUsers();
+            }
+        });
+    }
+
+    private void readUsers() {
+
+        CollectionReference usersPath = mFireBaseFireStore.collection("User");
+        usersPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+
+                mUsers.clear();
+
+                for (QueryDocumentSnapshot doc : value) {
+
+                    User user = doc.toObject(User.class);
+
+                    for (String id : usersList) {
+
+                        if (user.getId().equals(id)) {
+                            mUsers.add(user);
+                        }
+                    }
+                }
+                adapter = new UserAdapter(context, mUsers, true);
+                recyclerView.setAdapter(adapter);
+            }
+        });
     }
 
     private void setupSearchSuggestions() {
 
         searchSuggestions.clear();
 
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String mCurrentUserId = firebaseUser.getUid();
-
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        CollectionReference userListReference = firebaseFirestore.collection("User");
+        CollectionReference userListReference = mFireBaseFireStore.collection("User");
         userListReference.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -92,10 +167,11 @@ public class ChatsFragment extends Fragment {
 
     private void search() {
 
-        /*repository.deleteAllUsers();
+        Repository repository = new Repository(getActivity().getApplication());
+        repository.deleteAllUsers();
 
-        CollectionReference userListReference = mFireBaseFireStore.collection("User");
-        userListReference.get()
+        CollectionReference usersPath = mFireBaseFireStore.collection("User");
+        usersPath.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -110,8 +186,16 @@ public class ChatsFragment extends Fragment {
                                     repository.insert(userEntity);
                                 }
                             }
+
+                            String searchTerm = searchField.getText().toString().trim().toLowerCase();
+
+                            Intent i = new Intent(context, SearchActivity.class);
+                            i.putExtra("searchTerm", searchTerm);
+                            i.putExtra("searchSuggestions", searchSuggestions);
+                            startActivity(i);
+                            getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                         }
                     }
-                });*/
+                });
     }
 }

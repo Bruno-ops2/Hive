@@ -19,11 +19,15 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.fragments.ChatsFragment;
 import com.interstellarstudios.hive.fragments.ProfileFragment;
@@ -42,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewProfilePic;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
+    private ListenerRegistration unreadListener;
+    private boolean newMessages = false;
+    private  BottomNavigationView bottomNav;
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -52,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (item.getItemId()) {
                         case R.id.navigation_chats:
                             selectedFragment = new ChatsFragment();
-                            textViewFragmentTitle.setText("Chats");
+                            textViewFragmentTitle.setText("Chats ");
                             break;
                         case R.id.navigation_users:
                             selectedFragment = new UsersFragment();
@@ -105,11 +112,12 @@ public class MainActivity extends AppCompatActivity {
                     new ChatsFragment()).commit();
         }
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-        bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_SELECTED);
+        bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_LABELED);
 
         profilePicOperations();
+        unreadMessages();
     }
 
     private void profilePicOperations() {
@@ -146,5 +154,42 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         chatPath.update("onlineOffline", "offline");
+
+        unreadListener.remove();
+    }
+
+    private void unreadMessages() {
+
+        CollectionReference unreadPath = mFireBaseFireStore.collection("Chats").document(mCurrentUserId).collection("Single");
+        unreadListener = unreadPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+
+                for (QueryDocumentSnapshot doc : value) {
+
+                    CollectionReference messagesPath = mFireBaseFireStore.collection("Chats").document(mCurrentUserId).collection("Single").document(doc.getId()).collection("Messages");
+                    messagesPath.whereEqualTo("isRead", false).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot value,
+                                            @Nullable FirebaseFirestoreException e) {
+                            if (e != null) {
+                                return;
+                            }
+
+                            for (QueryDocumentSnapshot doc : value) {
+
+                                if (doc.exists()) {
+                                    bottomNav.getMenu().findItem(R.id.navigation_chats).setTitle("New");
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 }

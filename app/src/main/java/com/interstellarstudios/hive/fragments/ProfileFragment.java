@@ -26,7 +26,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -75,6 +74,14 @@ public class ProfileFragment extends Fragment {
         context = getActivity();
         repository = new Repository(getActivity().getApplication());
 
+        androidUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        mFireBaseAuth = FirebaseAuth.getInstance();
+        mFireBaseFireStore = FirebaseFirestore.getInstance();
+        if (mFireBaseAuth.getCurrentUser() != null) {
+            mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
+        }
+
         List<CurrentUserEntity> currentUserEntityList = repository.getCurrentUser();
 
         String username = null;
@@ -90,15 +97,6 @@ public class ProfileFragment extends Fragment {
         }
         textViewUsername = view.findViewById(R.id.text_view_username);
         textViewUsername.setText(username);
-
-        androidUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        mFireBaseAuth = FirebaseAuth.getInstance();
-        mFireBaseFireStore = FirebaseFirestore.getInstance();
-
-        if (mFireBaseAuth.getCurrentUser() != null) {
-            mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
-        }
 
         imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,13 +231,7 @@ public class ProfileFragment extends Fragment {
 
     private void usernameOperations() {
 
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String currentUserId = firebaseUser.getUid();
-
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-
-        DocumentReference currentUserRef = firebaseFirestore.collection("User").document(currentUserId);
+        DocumentReference currentUserRef = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot,
