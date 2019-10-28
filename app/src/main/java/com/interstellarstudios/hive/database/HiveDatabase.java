@@ -5,7 +5,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {UserEntity.class, CurrentUserEntity.class, ChatUserEntity.class}, version = 5, exportSchema = false)
+@Database(entities = {UserEntity.class, CurrentUserEntity.class, ChatUserEntity.class, RecentSearchesEntity.class}, version = 6, exportSchema = false)
 
 public abstract class HiveDatabase extends RoomDatabase {
 
@@ -13,6 +13,7 @@ public abstract class HiveDatabase extends RoomDatabase {
     public abstract UsersDAO usersDAO();
     public abstract CurrentUserDAO currentUserDAO();
     public abstract ChatUserDAO chatUserDAO();
+    public abstract RecentSearchesDAO recentSearchesDAO();
 
     public static synchronized HiveDatabase getInstance(Context context) {
 

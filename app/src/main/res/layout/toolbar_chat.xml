@@ -27,7 +27,7 @@
         android:fontFamily="@font/lato_bold"
         android:text="username"
         android:textColor="@color/PrimaryDark"
-        android:textSize="22sp" />
+        android:textSize="18sp" />
 
     <ImageView
         android:id="@+id/image_view_share"

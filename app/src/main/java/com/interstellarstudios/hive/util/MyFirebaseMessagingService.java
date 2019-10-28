@@ -47,7 +47,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
             String channelId = "General Notifications";
-            //Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             NotificationCompat.Builder notificationBuilder =
                     new NotificationCompat.Builder(this, channelId)
                             .setSmallIcon(R.drawable.ic_notification)
@@ -55,7 +55,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             .setContentText(body)
                             .setColor(getResources().getColor(R.color.Accent))
                             .setAutoCancel(true)
-                            //.setSound(defaultSoundUri)
+                            .setSound(defaultSoundUri)
                             .setContentIntent(pendingIntent);
 
             NotificationManager notificationManager =

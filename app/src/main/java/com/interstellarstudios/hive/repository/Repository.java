@@ -7,6 +7,8 @@ import com.interstellarstudios.hive.database.ChatUserEntity;
 import com.interstellarstudios.hive.database.CurrentUserDAO;
 import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.database.HiveDatabase;
+import com.interstellarstudios.hive.database.RecentSearchesDAO;
+import com.interstellarstudios.hive.database.RecentSearchesEntity;
 import com.interstellarstudios.hive.database.UserEntity;
 import com.interstellarstudios.hive.database.UsersDAO;
 
@@ -17,6 +19,7 @@ public class Repository {
     private UsersDAO usersDAO;
     private CurrentUserDAO currentUserDAO;
     private ChatUserDAO chatUserDAO;
+    private RecentSearchesDAO recentSearchesDAO;
 
     public Repository(Application application) {
 
@@ -24,6 +27,7 @@ public class Repository {
         usersDAO = hiveDatabase.usersDAO();
         currentUserDAO = hiveDatabase.currentUserDAO();
         chatUserDAO = hiveDatabase.chatUserDAO();
+        recentSearchesDAO = hiveDatabase.recentSearchesDAO();
     }
 
     public void insert(UserEntity userEntity) {
@@ -88,5 +92,29 @@ public class Repository {
 
     public List<ChatUserEntity> getChatUser() {
         return chatUserDAO.getAll();
+    }
+
+    public void insert(RecentSearchesEntity recentSearchesEntity) {
+        recentSearchesDAO.insert(recentSearchesEntity);
+    }
+
+    public void update(RecentSearchesEntity recentSearchesEntity) {
+        recentSearchesDAO.update(recentSearchesEntity);
+    }
+
+    public void delete(RecentSearchesEntity recentSearchesEntity) {
+        recentSearchesDAO.delete(recentSearchesEntity);
+    }
+
+    public void deleteAllRecentSearches() {
+        recentSearchesDAO.deleteAll();
+    }
+
+    public List<RecentSearchesEntity> getRecentSearches() {
+        return recentSearchesDAO.getAll();
+    }
+
+    public long getTimeStamp(String term) {
+        return recentSearchesDAO.getTimeStamp(term);
     }
 }

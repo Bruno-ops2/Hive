@@ -15,11 +15,12 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -36,6 +37,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.interstellarstudios.hive.R;
 import com.interstellarstudios.hive.RegisterActivity;
+import com.interstellarstudios.hive.StatusActivity;
 import com.interstellarstudios.hive.UserNameActivity;
 import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.database.HiveDatabase;
@@ -65,6 +67,7 @@ public class ProfileFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView imageViewProfilePic;
     private TextView textViewUsername;
+    private TextView textViewStatus;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,9 +89,11 @@ public class ProfileFragment extends Fragment {
 
         String username = null;
         String profilePicUrl = null;
+        String status = null;
         for (CurrentUserEntity currentUserEntity : currentUserEntityList) {
             profilePicUrl = currentUserEntity.getProfilePicUrl();
             username = currentUserEntity.getUsername();
+            status = currentUserEntity.getStatus();
         }
 
         imageViewProfilePic = view.findViewById(R.id.image_view_profile_pic);
@@ -105,8 +110,45 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        Button buttonChangeUsername = view.findViewById(R.id.button_change_username);
-        buttonChangeUsername.setOnClickListener(new View.OnClickListener() {
+        textViewStatus = view.findViewById(R.id.text_view_status);
+        textViewStatus.setText(status);
+
+        ImageView imageViewEditStatus = view.findViewById(R.id.image_view_change_status);
+        imageViewEditStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, StatusActivity.class);
+                startActivity(i);
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+
+        TextView textViewEditStatus = view.findViewById(R.id.text_view_change_status);
+        textViewEditStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, StatusActivity.class);
+                startActivity(i);
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+
+        ImageView clearSearchHistory = view.findViewById(R.id.image_view_bin_icon);
+        clearSearchHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                YoYo.with(Techniques.Wobble)
+                        .duration(750)
+                        .playOn(clearSearchHistory);
+
+                repository.deleteAllRecentSearches();
+                Toasty.success(context, "Search history cleared", Toast.LENGTH_LONG, true).show();
+            }
+        });
+
+        TextView textViewEditUsername = view.findViewById(R.id.text_view_change_username);
+        textViewEditUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(context, UserNameActivity.class);
@@ -115,8 +157,26 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        Button buttonLogOut = view.findViewById(R.id.button_log_out);
-        buttonLogOut.setOnClickListener(new View.OnClickListener() {
+        ImageView imageViewEditUsername = view.findViewById(R.id.image_view_change_username);
+        imageViewEditUsername.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, UserNameActivity.class);
+                startActivity(i);
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+
+        TextView textViewLogout = view.findViewById(R.id.text_view_logout);
+        textViewLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logOut();
+            }
+        });
+
+        ImageView imageViewLogout = view.findViewById(R.id.image_view_logout);
+        imageViewLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 logOut();
@@ -130,7 +190,10 @@ public class ProfileFragment extends Fragment {
 
     private void logOut() {
 
-        DocumentReference userTokenDocumentPath = mFireBaseFireStore.collection(mCurrentUserId).document("User").collection("Tokens").document(androidUUID);
+        DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
+        userPath.update("onlineOffline", "offline");
+
+        DocumentReference userTokenDocumentPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document(androidUUID);
         userTokenDocumentPath.delete();
 
         mFireBaseAuth.signOut();
@@ -243,6 +306,7 @@ public class ProfileFragment extends Fragment {
                 if (snapshot != null && snapshot.exists()) {
                     User user = snapshot.toObject(User.class);
                     textViewUsername.setText(user.getUsername());
+                    textViewStatus.setText(user.getStatus());
                 }
             }
         });

@@ -18,6 +18,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,12 +33,15 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.R;
 import com.interstellarstudios.hive.SearchActivity;
 import com.interstellarstudios.hive.adapters.UserAdapter;
+import com.interstellarstudios.hive.database.RecentSearchesEntity;
 import com.interstellarstudios.hive.database.UserEntity;
 import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import es.dmoral.toasty.Toasty;
 
 public class ChatsFragment extends Fragment {
 
@@ -50,6 +54,8 @@ public class ChatsFragment extends Fragment {
     private AutoCompleteTextView searchField;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
+    private List<RecentSearchesEntity> recentSearchesList = new ArrayList<>();
+    private ArrayList<String> recentSearchesStringArrayList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -189,11 +195,39 @@ public class ChatsFragment extends Fragment {
 
                             String searchTerm = searchField.getText().toString().trim().toLowerCase();
 
+                            recentSearchesList.clear();
+                            recentSearchesStringArrayList.clear();
+
+                            recentSearchesList = repository.getRecentSearches();
+
+                            for (RecentSearchesEntity recentSearches : recentSearchesList) {
+                                String recentSearchesListString = recentSearches.getSearchTerm();
+                                recentSearchesStringArrayList.add(recentSearchesListString);
+                            }
+
+                            if (!recentSearchesStringArrayList.contains(searchTerm) && !searchTerm.equals("")) {
+                                long timeStamp = System.currentTimeMillis();
+                                RecentSearchesEntity recentSearches = new RecentSearchesEntity(timeStamp, searchTerm);
+                                repository.insert(recentSearches);
+
+                            } else if (recentSearchesStringArrayList.contains(searchTerm)) {
+                                long timeStampQuery = repository.getTimeStamp(searchTerm);
+                                RecentSearchesEntity recentSearchesOld = new RecentSearchesEntity(timeStampQuery, searchTerm);
+                                repository.delete(recentSearchesOld);
+
+                                long timeStamp = System.currentTimeMillis();
+                                RecentSearchesEntity recentSearchesNew = new RecentSearchesEntity(timeStamp, searchTerm);
+                                repository.insert(recentSearchesNew);
+                            }
+
                             Intent i = new Intent(context, SearchActivity.class);
                             i.putExtra("searchTerm", searchTerm);
                             i.putExtra("searchSuggestions", searchSuggestions);
                             startActivity(i);
                             getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+
+                        } else {
+                            Toasty.error(context, "Connection error", Toast.LENGTH_LONG, true).show();
                         }
                     }
                 });

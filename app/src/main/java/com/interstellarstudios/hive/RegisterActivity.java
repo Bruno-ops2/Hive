@@ -382,7 +382,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "I'm using Hive!", mCurrentUserEmail));
+                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "Available", mCurrentUserEmail));
 
                             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
                                 @Override
@@ -398,6 +398,9 @@ public class RegisterActivity extends AppCompatActivity {
                             });
 
                             GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
+
+                            DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
+                            userPath.update("onlineOffline", "online");
 
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -452,6 +455,9 @@ public class RegisterActivity extends AppCompatActivity {
                             });
 
                             GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
+
+                            DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
+                            userPath.update("onlineOffline", "online");
 
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

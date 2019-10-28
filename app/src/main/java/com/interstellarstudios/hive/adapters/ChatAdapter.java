@@ -8,18 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.interstellarstudios.hive.R;
 import com.interstellarstudios.hive.database.ChatUserEntity;
 import com.interstellarstudios.hive.models.Message;
-import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 import com.squareup.picasso.Picasso;
 
@@ -29,8 +22,8 @@ import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
-    public static final int MSG_TYPE_LEFT = 0;
-    public static final int MSG_TYPE_RIGHT = 1;
+    private static final int MSG_TYPE_LEFT = 0;
+    private static final int MSG_TYPE_RIGHT = 1;
     private Context mContext;
     private List<Message> mChat;
     private boolean isSender;
@@ -83,11 +76,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView textViewShowMessage;
-        public TextView textViewTimeStamp;
-        public ImageView imageViewBlueTicks;
-        public ImageView imageViewGreyTicks;
-        public ImageView imageViewProfilePic;
+        private TextView textViewShowMessage;
+        private TextView textViewTimeStamp;
+        private ImageView imageViewBlueTicks;
+        private ImageView imageViewGreyTicks;
+        private ImageView imageViewProfilePic;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

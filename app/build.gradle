@@ -45,8 +45,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
+    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.google.firebase:firebase-core:17.2.0'
     implementation 'com.google.firebase:firebase-auth:19.1.0'
     implementation 'com.google.firebase:firebase-firestore:21.2.0'
@@ -65,9 +65,10 @@ dependencies {
     implementation 'jp.wasabeef:richeditor-android:1.2.2'
     implementation 'com.nbsp:library:1.8'
     implementation 'com.sendinblue:sib-api-v3-sdk:3.0.1'
-
     implementation 'com.daimajia.easing:library:2.0@aar'
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
+
+    implementation 'com.sjl:Foredroid:1.0.2'
 
     implementation 'androidx.room:room-runtime:2.2.0'
     implementation 'androidx.navigation:navigation-fragment:2.1.0'

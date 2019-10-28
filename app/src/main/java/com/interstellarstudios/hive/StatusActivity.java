@@ -19,29 +19,23 @@ import android.widget.Toast;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.firestore.GetData;
-import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
 
 import es.dmoral.toasty.Toasty;
 
-public class UserNameActivity extends AppCompatActivity implements Foreground.Listener {
+public class StatusActivity extends AppCompatActivity implements Foreground.Listener {
 
     private Context context = this;
     private ImageView imageViewHiveLogo;
-    private EditText editTextUsername;
-    private Button buttonConfirmUsername;
+    private EditText editTextStatus;
+    private Button buttonConfirmStatus;
     private Window window;
     private View container;
     private FirebaseFirestore mFireBaseFireStore;
@@ -51,7 +45,7 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_name);
+        setContentView(R.layout.activity_status);
 
         SharedPreferences sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
@@ -63,13 +57,13 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
         }
 
         imageViewHiveLogo = findViewById(R.id.image_view_hive_logo);
-        editTextUsername = findViewById(R.id.edit_text_username);
-        buttonConfirmUsername = findViewById(R.id.button_confirm_username);
+        editTextStatus = findViewById(R.id.edit_text_status);
+        buttonConfirmStatus = findViewById(R.id.button_confirm_status);
 
-        buttonConfirmUsername.setOnClickListener(new View.OnClickListener() {
+        buttonConfirmStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chooseUsername();
+                chooseStatus();
             }
         });
 
@@ -100,8 +94,8 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_dark);
 
-        editTextUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
-        editTextUsername.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        editTextStatus.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        editTextStatus.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
@@ -109,11 +103,11 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
-                .playOn(editTextUsername);
+                .playOn(editTextStatus);
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
-                .playOn(buttonConfirmUsername);
+                .playOn(buttonConfirmStatus);
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
@@ -130,8 +124,8 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_light);
 
-        editTextUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        editTextUsername.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        editTextStatus.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        editTextStatus.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
@@ -139,11 +133,11 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
-                .playOn(editTextUsername);
+                .playOn(editTextStatus);
 
         YoYo.with(Techniques.FadeIn)
                 .duration(500)
-                .playOn(buttonConfirmUsername);
+                .playOn(buttonConfirmStatus);
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         if (container != null) {
@@ -152,60 +146,32 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
         }
     }
 
-    private void chooseUsername() {
+    private void chooseStatus() {
 
-        String username = editTextUsername.getText().toString().trim();
+        String status = editTextStatus.getText().toString().trim();
 
-        if (TextUtils.isEmpty(username)) {
-            Toasty.info(context, "Please enter a username", Toast.LENGTH_LONG, true).show();
-            return;
-        } else if (username.length() < 6) {
-            Toasty.info(context, "Username must be at least 6 characters", Toast.LENGTH_LONG, true).show();
+        if (TextUtils.isEmpty(status)) {
+            Toasty.info(context, "Please enter a status", Toast.LENGTH_LONG, true).show();
             return;
         }
 
-        CollectionReference userDetailsPath = mFireBaseFireStore.collection("User");
-        userDetailsPath.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+        DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
+        userDetailsPath.update("status", status).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Repository repository = new Repository(getApplication());
+                GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
 
-                                User user = document.toObject(User.class);
-
-                                if (!user.getId().equals(mCurrentUserId)) {
-
-                                    if (username.equals(user.getUsername())) {
-                                        Toasty.error(context, "This username is taken", Toast.LENGTH_LONG, true).show();
-                                        return;
-                                    }
-                                }
-                            }
-
-                            DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.update("username", username).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Repository repository = new Repository(getApplication());
-                                    GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-
-                                    finish();
-                                    overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
-                                    hideKeyboard(UserNameActivity.this);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toasty.error(context, "Error, please ensure that there is an active network connection", Toast.LENGTH_LONG, true).show();
-                                }
-                            });
-
-                        } else {
-                            Toasty.error(context, "Error, please ensure that there is an active network connection", Toast.LENGTH_LONG, true).show();
-                        }
-                    }
-                });
+                finish();
+                overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+                hideKeyboard(StatusActivity.this);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toasty.error(context, "Error, please ensure that there is an active network connection", Toast.LENGTH_LONG, true).show();
+            }
+        });
     }
 
     @Override

@@ -1,80 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/PrimaryLight"
-    tools:context=".RegisterActivity">
+    android:layout_height="match_parent">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/image_view_profile_pic"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/empty_profile_pic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/image_view_camera_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/camera_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/image_view_profile_pic"
-        app:layout_constraintEnd_toEndOf="@+id/image_view_profile_pic" />
-
-    <TextView
-        android:id="@+id/text_view_username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/lato_bold"
-        android:text="username"
-        android:textColor="@color/SecondaryDark"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/image_view_profile_pic" />
-
-    <Button
-        android:id="@+id/button_change_username"
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/rounded_edges"
-        android:backgroundTint="@color/Accent"
-        android:fontFamily="@font/lato_bold"
-        android:text="Change Username"
-        android:textAllCaps="false"
-        android:textColor="@color/PrimaryLight"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_log_out"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button_log_out"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/rounded_edges"
-        android:backgroundTint="@color/Accent"
-        android:fontFamily="@font/lato_bold"
-        android:text="Log Out"
-        android:textAllCaps="false"
-        android:textColor="@color/PrimaryLight"
-        android:textSize="14sp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/PrimaryLight">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_profile_pic"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="32dp"
+                android:src="@drawable/empty_profile_pic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_camera_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/camera_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_profile_pic"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_profile_pic" />
+
+            <TextView
+                android:id="@+id/text_view_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/lato_bold"
+                android:text="username"
+                android:textColor="@color/SecondaryDark"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_profile_pic" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_dark_mode_icon"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="48dp"
+                android:src="@drawable/moon_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_status" />
+
+            <TextView
+                android:id="@+id/text_view_dark_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/lato"
+                android:text="Dark Mode"
+                android:textColor="@color/SecondaryDark"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_dark_mode_icon"
+                app:layout_constraintStart_toEndOf="@+id/image_view_dark_mode_icon"
+                app:layout_constraintTop_toTopOf="@+id/image_view_dark_mode_icon" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_search_history_icon"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/search_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_dark_mode_icon" />
+
+            <TextView
+                android:id="@+id/text_view_search_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/lato"
+                android:text="Clear Search History"
+                android:textColor="@color/SecondaryDark"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_search_history_icon"
+                app:layout_constraintStart_toEndOf="@+id/image_view_search_history_icon"
+                app:layout_constraintTop_toTopOf="@+id/image_view_search_history_icon" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_change_username"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/username_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_search_history_icon" />
+
+            <TextView
+                android:id="@+id/text_view_change_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/lato"
+                android:text="Change Username"
+                android:textColor="@color/SecondaryDark"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_change_username"
+                app:layout_constraintStart_toEndOf="@+id/image_view_change_username"
+                app:layout_constraintTop_toTopOf="@+id/image_view_change_username" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_change_status"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/status_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_change_username" />
+
+            <TextView
+                android:id="@+id/text_view_change_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/lato"
+                android:text="Edit Status"
+                android:textColor="@color/SecondaryDark"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_change_status"
+                app:layout_constraintStart_toEndOf="@+id/image_view_change_status"
+                app:layout_constraintTop_toTopOf="@+id/image_view_change_status" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_logout"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/logout_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_change_status" />
+
+            <TextView
+                android:id="@+id/text_view_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/lato"
+                android:text="Log Out"
+                android:textColor="@color/SecondaryDark"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_logout"
+                app:layout_constraintStart_toEndOf="@+id/image_view_logout"
+                app:layout_constraintTop_toTopOf="@+id/image_view_logout" />
+
+            <Switch
+                android:id="@+id/switch_dark_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_dark_mode_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/image_view_dark_mode_icon" />
+
+            <ImageView
+                android:id="@+id/image_view_bin_icon"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_search_history_icon"
+                app:layout_constraintEnd_toEndOf="@+id/switch_dark_mode"
+                app:layout_constraintStart_toStartOf="@+id/switch_dark_mode"
+                app:layout_constraintTop_toTopOf="@+id/image_view_search_history_icon"
+                app:srcCompat="@drawable/ic_bin" />
+
+            <TextView
+                android:id="@+id/text_view_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lato_bold"
+                android:text="Available"
+                android:textColor="@color/SecondaryDark"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_username" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

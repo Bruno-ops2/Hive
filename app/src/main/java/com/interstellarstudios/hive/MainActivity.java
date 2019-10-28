@@ -19,24 +19,21 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.fragments.ChatsFragment;
 import com.interstellarstudios.hive.fragments.ProfileFragment;
 import com.interstellarstudios.hive.fragments.UsersFragment;
 import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
+import com.sjl.foreground.Foreground;
 import com.squareup.picasso.Picasso;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Foreground.Listener {
 
     private Context context = this;
     private Repository repository;
@@ -46,9 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewProfilePic;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
-    private ListenerRegistration unreadListener;
-    private boolean newMessages = false;
-    private  BottomNavigationView bottomNav;
+    //private boolean newMessages = false;
+    private Foreground.Binding listenerBinding;
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -112,12 +108,14 @@ public class MainActivity extends AppCompatActivity {
                     new ChatsFragment()).commit();
         }
 
-        bottomNav = findViewById(R.id.bottom_nav);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-        bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_LABELED);
+        bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_SELECTED);
 
         profilePicOperations();
-        unreadMessages();
+        //unreadMessages();
+
+        listenerBinding = Foreground.get(getApplication()).addListener(this);
     }
 
     private void profilePicOperations() {
@@ -143,22 +141,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onDestroy() {
+        super.onDestroy();
+        listenerBinding.unbind();
+    }
+
+    @Override
+    public void onBecameForeground() {
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         chatPath.update("onlineOffline", "online");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public void onBecameBackground() {
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         chatPath.update("onlineOffline", "offline");
-
-        unreadListener.remove();
     }
 
-    private void unreadMessages() {
+    /*private void unreadMessages() {
 
         CollectionReference unreadPath = mFireBaseFireStore.collection("Chats").document(mCurrentUserId).collection("Single");
         unreadListener = unreadPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -191,5 +191,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    }*/
 }

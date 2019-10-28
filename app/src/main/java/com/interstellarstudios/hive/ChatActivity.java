@@ -31,7 +31,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -41,6 +40,7 @@ import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.models.Message;
 import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
+import com.sjl.foreground.Foreground;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements Foreground.Listener {
 
     private Context context = this;
     private String altUserId;
@@ -57,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatAdapter chatAdapter;
     private List<Message> mChat;
     private RecyclerView recyclerView;
-    private ListenerRegistration seenListener;
+    //private ListenerRegistration seenListener;
     private FirebaseFirestore mFireBaseFireStore;
     private String currentUsername;
     private ImageView imageViewProfilePic;
@@ -65,6 +65,7 @@ public class ChatActivity extends AppCompatActivity {
     private Window window;
     private View container;
     private Repository repository;
+    private Foreground.Binding listenerBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +122,24 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         imageViewProfilePic = findViewById(R.id.image_view_profile_pic);
+        imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, ProfileViewActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+
         textViewUsername = findViewById(R.id.text_view_username);
+        textViewUsername.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, ProfileViewActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -150,6 +168,8 @@ public class ChatActivity extends AppCompatActivity {
         readMessages();
         seenMessage();
         updateToRead();
+
+        listenerBinding = Foreground.get(getApplication()).addListener(this);
     }
 
     private void sendMessage(String message) {
@@ -203,6 +223,24 @@ public class ChatActivity extends AppCompatActivity {
     private void seenMessage() {
 
         CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages");
+        seenPath.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                DocumentReference messagePath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(document.getId());
+                                messagePath.update("seen", true);
+                            }
+                        }
+                    }
+                });
+    }
+
+    /*private void seenMessage() {
+
+        CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages");
         seenListener = seenPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value,
@@ -218,7 +256,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    }*/
 
     private void updateToRead() {
 
@@ -241,25 +279,24 @@ public class ChatActivity extends AppCompatActivity {
     private void getChatUserData() {
 
         DocumentReference chatUserRef = mFireBaseFireStore.collection("User").document(altUserId);
-        chatUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        chatUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    return;
-                }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
 
-                if (snapshot != null && snapshot.exists()) {
-                    User user = snapshot.toObject(User.class);
+                        User user = document.toObject(User.class);
 
-                    repository.deleteChatUser();
-                    ChatUserEntity chatUserEntity = new ChatUserEntity(user.getId(), user.getUsername(), user.getProfilePicUrl(), user.getStatus(), user.getEmailAddress());
-                    repository.insert(chatUserEntity);
+                        repository.deleteChatUser();
+                        ChatUserEntity chatUserEntity = new ChatUserEntity(user.getId(), user.getUsername(), user.getProfilePicUrl(), user.getStatus(), user.getEmailAddress());
+                        repository.insert(chatUserEntity);
 
-                    textViewUsername.setText(user.getUsername());
+                        textViewUsername.setText(user.getUsername());
 
-                    if (user.getProfilePicUrl() != null) {
-                        Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
+                        if (user.getProfilePicUrl() != null) {
+                            Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
+                        }
                     }
                 }
             }
@@ -279,21 +316,31 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        DocumentReference chatPath = mFireBaseFireStore.collection("User").document(currentUserId);
-        chatPath.update("onlineOffline", "online");
-
         currentUser(altUserId);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        currentUser("none");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        listenerBinding.unbind();
+    }
+
+    @Override
+    public void onBecameForeground() {
+        DocumentReference chatPath = mFireBaseFireStore.collection("User").document(currentUserId);
+        chatPath.update("onlineOffline", "online");
+    }
+
+    @Override
+    public void onBecameBackground() {
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(currentUserId);
         chatPath.update("onlineOffline", "offline");
-
-        currentUser("none");
-
-        seenListener.remove();
     }
 
     private void currentUser(String userId) {

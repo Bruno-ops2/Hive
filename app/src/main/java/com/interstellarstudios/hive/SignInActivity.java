@@ -329,6 +329,9 @@ public class SignInActivity extends AppCompatActivity {
 
                             GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
 
+                            DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
+                            userPath.update("onlineOffline", "online");
+
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(i);

@@ -37,7 +37,7 @@
                 app:srcCompat="@drawable/hive_text_logo_dark" />
 
             <EditText
-                android:id="@+id/edit_text_username"
+                android:id="@+id/edit_text_status"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
@@ -46,7 +46,7 @@
                 android:autofillHints="email address"
                 android:ems="10"
                 android:fontFamily="@font/lato_bold"
-                android:hint="Choose a username"
+                android:hint="Enter status"
                 android:importantForAutofill="yes"
                 android:inputType="textEmailAddress"
                 android:textColor="@color/PrimaryDark"
@@ -60,7 +60,7 @@
                 tools:targetApi="o" />
 
             <Button
-                android:id="@+id/button_confirm_username"
+                android:id="@+id/button_confirm_status"
                 android:layout_width="0dp"
                 android:layout_height="35dp"
                 android:layout_marginStart="32dp"
@@ -76,7 +76,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/edit_text_username" />
+                app:layout_constraintTop_toBottomOf="@+id/edit_text_status" />
 
             <TextView
                 android:id="@+id/dummy"
@@ -86,7 +86,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_confirm_username" />
+                app:layout_constraintTop_toBottomOf="@+id/button_confirm_status" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
