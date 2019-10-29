@@ -58,7 +58,7 @@
                 android:id="@+id/image_view_dark_mode_icon"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="40dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="48dp"
                 android:src="@drawable/moon_icon"
                 app:layout_constraintStart_toStartOf="parent"
@@ -80,10 +80,10 @@
                 android:id="@+id/image_view_search_history_icon"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="40dp"
                 android:layout_marginTop="16dp"
                 android:src="@drawable/search_icon"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_dark_mode_icon"
+                app:layout_constraintStart_toStartOf="@+id/image_view_dark_mode_icon"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_dark_mode_icon" />
 
             <TextView
@@ -102,10 +102,10 @@
                 android:id="@+id/image_view_change_username"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="40dp"
                 android:layout_marginTop="16dp"
                 android:src="@drawable/username_icon"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_search_history_icon"
+                app:layout_constraintStart_toStartOf="@+id/image_view_search_history_icon"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_search_history_icon" />
 
             <TextView
@@ -124,10 +124,10 @@
                 android:id="@+id/image_view_change_status"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="40dp"
                 android:layout_marginTop="16dp"
                 android:src="@drawable/status_icon"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_change_username"
+                app:layout_constraintStart_toStartOf="@+id/image_view_change_username"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_change_username" />
 
             <TextView
@@ -146,10 +146,10 @@
                 android:id="@+id/image_view_logout"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="40dp"
                 android:layout_marginTop="16dp"
                 android:src="@drawable/logout_icon"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_change_status"
+                app:layout_constraintStart_toStartOf="@+id/image_view_change_status"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_change_status" />
 
             <TextView
@@ -168,7 +168,7 @@
                 android:id="@+id/switch_dark_mode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="40dp"
+                android:layout_marginEnd="32dp"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_dark_mode_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/image_view_dark_mode_icon" />
@@ -187,10 +187,10 @@
                 android:id="@+id/text_view_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/lato_bold"
+                android:fontFamily="@font/lato"
                 android:text="Available"
                 android:textColor="@color/SecondaryDark"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"

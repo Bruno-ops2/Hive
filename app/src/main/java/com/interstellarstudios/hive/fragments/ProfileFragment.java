@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +61,6 @@ public class ProfileFragment extends Fragment {
     private String mCurrentUserId;
     private FirebaseFirestore mFireBaseFireStore;
     private FirebaseAuth mFireBaseAuth;
-    private String androidUUID;
     private Repository repository;
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView imageViewProfilePic;
@@ -75,9 +73,8 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         context = getActivity();
-        repository = new Repository(getActivity().getApplication());
 
-        androidUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        repository = new Repository(getActivity().getApplication());
 
         mFireBaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
@@ -193,7 +190,7 @@ public class ProfileFragment extends Fragment {
         DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         userPath.update("onlineOffline", "offline");
 
-        DocumentReference userTokenDocumentPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document(androidUUID);
+        DocumentReference userTokenDocumentPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document("User_Token");
         userTokenDocumentPath.delete();
 
         mFireBaseAuth.signOut();

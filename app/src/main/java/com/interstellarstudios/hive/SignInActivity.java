@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -23,19 +22,13 @@ import android.widget.Toast;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.repository.Repository;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
@@ -55,7 +48,6 @@ public class SignInActivity extends AppCompatActivity {
     private TextView textViewForgotPassword;
     private TextView textViewForgotPassword2;
     private SharedPreferences sharedPreferences;
-    private String androidUUID;
     private FirebaseAuth mFireBaseAuth;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
@@ -67,8 +59,6 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         repository = new Repository(getApplication());
-
-        androidUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
@@ -313,19 +303,6 @@ public class SignInActivity extends AppCompatActivity {
                             if (mFireBaseAuth.getCurrentUser() != null) {
                                 mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
                             }
-
-                            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
-                                @Override
-                                public void onSuccess(InstanceIdResult instanceIdResult) {
-                                    String deviceToken = instanceIdResult.getToken();
-
-                                    Map<String, Object> userToken = new HashMap<>();
-                                    userToken.put("User_Token_ID", deviceToken);
-
-                                    DocumentReference userTokenPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document(androidUUID);
-                                    userTokenPath.set(userToken);
-                                }
-                            });
 
                             GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
 

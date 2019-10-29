@@ -15,6 +15,7 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,6 +25,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.fragments.ChatsFragment;
 import com.interstellarstudios.hive.fragments.ProfileFragment;
@@ -32,6 +35,9 @@ import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
 import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements Foreground.Listener {
 
@@ -114,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
 
         profilePicOperations();
         //unreadMessages();
+        registerToken();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
     }
@@ -156,6 +163,22 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     public void onBecameBackground() {
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         chatPath.update("onlineOffline", "offline");
+    }
+
+    private void registerToken() {
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String deviceToken = instanceIdResult.getToken();
+
+                Map<String, Object> userToken = new HashMap<>();
+                userToken.put("User_Token_ID", deviceToken);
+
+                DocumentReference userTokenPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document("User_Token");
+                userTokenPath.set(userToken);
+            }
+        });
     }
 
     /*private void unreadMessages() {
