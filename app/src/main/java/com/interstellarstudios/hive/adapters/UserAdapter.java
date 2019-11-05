@@ -1,7 +1,9 @@
 package com.interstellarstudios.hive.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +12,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -39,6 +45,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private String lastMessage;
     private long timeStamp;
     private boolean isChat;
+    private boolean isRead;
+    private String messageType;
 
     public UserAdapter(Context mContext, List<User> mUsers, boolean isChat) {
         this.mContext = mContext;
@@ -69,8 +77,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.imageViewStatusOnline.setVisibility(View.GONE);
         }
 
-        if(isChat) {
-            lastMessage(user.getId(), holder.textViewLastMessage, holder.textViewTimeStamp);
+        if (isChat) {
+            lastMessage(user.getId(), holder.textViewLastMessage, holder.textViewTimeStamp, holder.username);
+
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    deleteChat(user.getId());
+                    return true;
+                }
+            });
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -107,7 +123,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
     }
 
-    private void lastMessage(String altUserId, TextView textViewLastMessage, TextView textViewTimeStamp) {
+    private void lastMessage(String altUserId, TextView textViewLastMessage, TextView textViewTimeStamp, TextView textViewUsername) {
 
         lastMessage = "default";
         timeStamp = 0;
@@ -129,14 +145,38 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
                     Message message = doc.toObject(Message.class);
 
+                    messageType = message.getMessageType();
                     lastMessage = message.getMessage();
                     timeStamp = message.getTimeStamp();
+                    isRead = message.getIsRead();
                 }
 
                 if (lastMessage.equals("default")) {
                     textViewLastMessage.setText("");
+                } else if (messageType.equals("image")) {
+                    if (isRead) {
+                        textViewLastMessage.setText("Image");
+                    } else {
+                        textViewLastMessage.setText("Image");
+                        textViewLastMessage.setTypeface(null, Typeface.BOLD);
+                        textViewUsername.setTypeface(null, Typeface.BOLD);
+                    }
+                } else if (messageType.equals("attachment")) {
+                    if (isRead) {
+                        textViewLastMessage.setText("Attachment");
+                    } else {
+                        textViewLastMessage.setText("Attachment");
+                        textViewLastMessage.setTypeface(null, Typeface.BOLD);
+                        textViewUsername.setTypeface(null, Typeface.BOLD);
+                    }
                 } else {
-                    textViewLastMessage.setText(ShortenMessage.getShortDesc(lastMessage));
+                    if (isRead) {
+                        textViewLastMessage.setText(ShortenMessage.getShortDesc(lastMessage));
+                    } else {
+                        textViewLastMessage.setText(ShortenMessage.getShortDesc(lastMessage));
+                        textViewLastMessage.setTypeface(null, Typeface.BOLD);
+                        textViewUsername.setTypeface(null, Typeface.BOLD);
+                    }
                 }
 
                 if (timeStamp == 0) {
@@ -154,5 +194,43 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         return formatter.format(calendar.getTime());
+    }
+
+    private void deleteChat(String altUserId) {
+
+        new AlertDialog.Builder(mContext)
+                .setTitle("Delete Chat")
+                .setMessage("Are you sure you want to delete this chat?")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        String currentUserId = firebaseUser.getUid();
+
+                        FirebaseFirestore mFireBaseFireStore = FirebaseFirestore.getInstance();
+
+                        CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages");
+                        seenPath.get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                                DocumentReference messagePath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages").document(document.getId());
+                                                messagePath.delete();
+
+                                                DocumentReference chatMessagePath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId);
+                                                chatMessagePath.delete();
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
     }
 }

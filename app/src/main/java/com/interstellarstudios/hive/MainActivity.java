@@ -2,32 +2,43 @@ package com.interstellarstudios.hive;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.interstellarstudios.hive.firestore.GetData;
+import com.interstellarstudios.hive.database.UserEntity;
 import com.interstellarstudios.hive.fragments.ChatsFragment;
 import com.interstellarstudios.hive.fragments.ProfileFragment;
 import com.interstellarstudios.hive.fragments.UsersFragment;
@@ -39,6 +50,8 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class MainActivity extends AppCompatActivity implements Foreground.Listener {
 
     private Context context = this;
@@ -49,8 +62,9 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     private ImageView imageViewProfilePic;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
-    //private boolean newMessages = false;
     private Foreground.Binding listenerBinding;
+    private BottomNavigationView bottomNav;
+    private static final int PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST = 13;
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -81,6 +95,10 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            getPermissionToWriteStorage();
+        }
 
         repository = new Repository(getApplication());
 
@@ -114,15 +132,48 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                     new ChatsFragment()).commit();
         }
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_SELECTED);
 
         profilePicOperations();
-        //unreadMessages();
+        unreadMessages();
         registerToken();
+        searchSetup();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
+    }
+
+    public void getPermissionToWriteStorage() {
+
+        new AlertDialog.Builder(context)
+                .setTitle("Permission needed to Write to External Storage")
+                .setMessage("This permission is needed in order save images taken with the camera when accessed by the App. Manually enable in Settings > Apps & notifications > Hive > Permissions.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST);
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        }).create().show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+
+        if (requestCode == PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST) {
+            if (grantResults.length == 1 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toasty.success(context, "External storage permission granted", Toast.LENGTH_LONG, true).show();
+            } else {
+                Toasty.error(context, "External storage permission denied", Toast.LENGTH_LONG, true).show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     private void profilePicOperations() {
@@ -138,9 +189,14 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
 
                 if (snapshot != null && snapshot.exists()) {
                     User user = snapshot.toObject(User.class);
+
+                    SharedPreferences sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+                    prefsEditor.putString("username", user.getUsername());
+                    prefsEditor.apply();
+
                     if (user.getProfilePicUrl() != null) {
                         Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
-                        GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
                     }
                 }
             }
@@ -181,10 +237,10 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         });
     }
 
-    /*private void unreadMessages() {
+    private void unreadMessages() {
 
         CollectionReference unreadPath = mFireBaseFireStore.collection("Chats").document(mCurrentUserId).collection("Single");
-        unreadListener = unreadPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        unreadPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value,
                                 @Nullable FirebaseFirestoreException e) {
@@ -206,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                             for (QueryDocumentSnapshot doc : value) {
 
                                 if (doc.exists()) {
-                                    bottomNav.getMenu().findItem(R.id.navigation_chats).setTitle("New");
+                                    bottomNav.getMenu().findItem(R.id.navigation_chats).setIcon(R.drawable.ic_new);
                                 }
                             }
                         }
@@ -214,5 +270,31 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                 }
             }
         });
-    }*/
+    }
+
+    private void searchSetup() {
+
+        CollectionReference usersPath = mFireBaseFireStore.collection("User");
+        usersPath.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            repository.deleteAllUsers();
+
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                User user = document.toObject(User.class);
+
+                                if (!user.getId().equals(mCurrentUserId)) {
+
+                                    UserEntity userEntity = new UserEntity(user.getId(), user.getUsername(), user.getProfilePicUrl(), user.getOnlineOffline(), user.getStatus(), user.getEmailAddress());
+                                    repository.insert(userEntity);
+                                }
+                            }
+                        }
+                    }
+                });
+    }
 }

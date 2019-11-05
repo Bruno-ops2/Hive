@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,9 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.models.User;
-import com.interstellarstudios.hive.repository.Repository;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -77,14 +76,12 @@ public class RegisterActivity extends AppCompatActivity {
     private String mCurrentUserId;
     private String mCurrentUserEmail;
     private FirebaseUser mCurrentUser;
-    private Repository repository;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
-        repository = new Repository(getApplication());
 
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
@@ -95,13 +92,12 @@ public class RegisterActivity extends AppCompatActivity {
 
             mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
 
-            GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-
             Intent i = new Intent(context, MainActivity.class);
             startActivity(i);
             finish();
         }
 
+        mProgressDialog = new ProgressDialog(context);
         imageViewHiveLogo = findViewById(R.id.image_view_hive_logo);
         editTextEmail = findViewById(R.id.edit_text_email);
         editTextPassword = findViewById(R.id.edit_text_password);
@@ -360,6 +356,9 @@ public class RegisterActivity extends AppCompatActivity {
         int num = rand.nextInt(9000000) + 1000000;
         String randomNumber = Integer.toString(num);
 
+        mProgressDialog.setMessage("Registering");
+        mProgressDialog.show();
+
         mFireBaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -375,8 +374,6 @@ public class RegisterActivity extends AppCompatActivity {
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "Available", mCurrentUserEmail));
 
-                            GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-
                             DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userPath.update("onlineOffline", "online");
 
@@ -390,6 +387,7 @@ public class RegisterActivity extends AppCompatActivity {
                         } else {
                             Toasty.error(context, "Registration error, please try again.", Toast.LENGTH_LONG, true).show();
                         }
+                        mProgressDialog.dismiss();
                     }
                 });
     }
@@ -403,6 +401,8 @@ public class RegisterActivity extends AppCompatActivity {
         String guestEmail = "guest" + randomNumber + "@interstellarstudios.co.uk";
         String guestPassword = md5(guestEmail);
 
+        mProgressDialog.setMessage("Launching");
+        mProgressDialog.show();
 
         mFireBaseAuth.createUserWithEmailAndPassword(guestEmail, guestPassword)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -417,9 +417,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "I'm using Hive!", mCurrentUserEmail));
-
-                            GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
+                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "Available", mCurrentUserEmail));
 
                             DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userPath.update("onlineOffline", "online");
@@ -432,6 +430,7 @@ public class RegisterActivity extends AppCompatActivity {
                         } else {
                             Toasty.error(context, "Registration error, please try again.", Toast.LENGTH_LONG, true).show();
                         }
+                        mProgressDialog.dismiss();
                     }
                 });
     }

@@ -1,6 +1,13 @@
-package com.interstellarstudios.hive.models;
+package com.interstellarstudios.hive.database;
 
-public class Message {
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "messages_table")
+public class MessageEntity {
+
+    @PrimaryKey(autoGenerate = true)
+    private int autoGenId;
 
     private String messageId;
     private String message;
@@ -15,11 +22,7 @@ public class Message {
     private String imageUrl;
     private String imageFileName;
 
-    public Message() {
-        //empty constructor needed
-    }
-
-    public Message(String messageId, String message, long timeStamp, boolean isSender, boolean seen, String senderId, String receiverId, String senderUsername, boolean isRead, String messageType, String imageUrl, String imageFileName) {
+    public MessageEntity (String messageId, String message, long timeStamp, boolean isSender, boolean seen, String senderId, String receiverId, String senderUsername, boolean isRead, String messageType, String imageUrl, String imageFileName) {
 
         this.messageId = messageId;
         this.message = message;
@@ -33,6 +36,14 @@ public class Message {
         this.messageType = messageType;
         this.imageUrl = imageUrl;
         this.imageFileName = imageFileName;
+    }
+
+    public void setAutoGenId(int autoGenId) {
+        this.autoGenId = autoGenId;
+    }
+
+    public int getAutoGenId() {
+        return autoGenId;
     }
 
     public String getMessageId() {

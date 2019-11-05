@@ -26,29 +26,87 @@
             android:id="@+id/edit_text_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/rounded_edges"
             android:backgroundTint="@color/SecondaryLight"
             android:ems="10"
             android:hint="Type a message"
             android:inputType="textMultiLine"
             android:padding="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/image_view_send_message"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_add_media"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_view_add_media"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/add_media"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_text_message"
             app:layout_constraintEnd_toStartOf="@+id/image_view_send_message"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/image_view_send_message" />
+            app:layout_constraintTop_toTopOf="@+id/edit_text_message" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_view_minus_media"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/minus_media"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_text_message"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_send_message"
+            app:layout_constraintTop_toTopOf="@+id/edit_text_message" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/image_view_send_message"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
             android:src="@drawable/send_message"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_text_message"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/edit_text_message" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_view_add_camera"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/cam_icon"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_message"
+            app:layout_constraintEnd_toEndOf="@+id/edit_text_message"
+            app:layout_constraintStart_toStartOf="@+id/edit_text_message"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_view_add_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/image_icon"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_message"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_add_camera"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_view_add_attachment"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/attach_icon"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_message"
+            app:layout_constraintStart_toEndOf="@+id/image_view_add_camera"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

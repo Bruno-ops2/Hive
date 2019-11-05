@@ -25,6 +25,6 @@ public interface UsersDAO {
     @Query("DELETE FROM users_table")
     void deleteAll();
 
-    @Query("SELECT * FROM users_table WHERE users_table.username LIKE '%' || :term || '%' COLLATE NOCASE")
+    @Query("SELECT * FROM users_table WHERE users_table.username LIKE '%' || :term || '%' OR users_table.emailAddress LIKE '%' || :term || '%' COLLATE NOCASE")
     List<UserEntity> search(String term);
 }

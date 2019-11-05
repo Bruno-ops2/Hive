@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,8 +28,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.interstellarstudios.hive.firestore.GetData;
-import com.interstellarstudios.hive.repository.Repository;
 
 import es.dmoral.toasty.Toasty;
 
@@ -51,20 +50,19 @@ public class SignInActivity extends AppCompatActivity {
     private FirebaseAuth mFireBaseAuth;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
-    private Repository repository;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        repository = new Repository(getApplication());
-
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
         mFireBaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
 
+        mProgressDialog = new ProgressDialog(context);
         imageViewHiveLogo = findViewById(R.id.image_view_hive_logo);
         editTextEmail = findViewById(R.id.edit_text_email);
         editTextPassword = findViewById(R.id.edit_text_password);
@@ -294,6 +292,9 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
+        mProgressDialog.setMessage("Signing in");
+        mProgressDialog.show();
+
         mFireBaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -303,8 +304,6 @@ public class SignInActivity extends AppCompatActivity {
                             if (mFireBaseAuth.getCurrentUser() != null) {
                                 mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
                             }
-
-                            GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
 
                             DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userPath.update("onlineOffline", "online");
@@ -318,6 +317,7 @@ public class SignInActivity extends AppCompatActivity {
                         } else {
                             Toasty.error(context, "Sign In Error, please try again. Please ensure that your email address and password are correct.", Toast.LENGTH_LONG, true).show();
                         }
+                        mProgressDialog.dismiss();
                     }
                 });
     }

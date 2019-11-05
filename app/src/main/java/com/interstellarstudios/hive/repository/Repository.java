@@ -4,9 +4,9 @@ import android.app.Application;
 
 import com.interstellarstudios.hive.database.ChatUserDAO;
 import com.interstellarstudios.hive.database.ChatUserEntity;
-import com.interstellarstudios.hive.database.CurrentUserDAO;
-import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.database.HiveDatabase;
+import com.interstellarstudios.hive.database.MessageDAO;
+import com.interstellarstudios.hive.database.MessageEntity;
 import com.interstellarstudios.hive.database.RecentSearchesDAO;
 import com.interstellarstudios.hive.database.RecentSearchesEntity;
 import com.interstellarstudios.hive.database.UserEntity;
@@ -17,17 +17,17 @@ import java.util.List;
 public class Repository {
 
     private UsersDAO usersDAO;
-    private CurrentUserDAO currentUserDAO;
     private ChatUserDAO chatUserDAO;
     private RecentSearchesDAO recentSearchesDAO;
+    private MessageDAO messageDAO;
 
     public Repository(Application application) {
 
         HiveDatabase hiveDatabase = HiveDatabase.getInstance(application);
         usersDAO = hiveDatabase.usersDAO();
-        currentUserDAO = hiveDatabase.currentUserDAO();
         chatUserDAO = hiveDatabase.chatUserDAO();
         recentSearchesDAO = hiveDatabase.recentSearchesDAO();
+        messageDAO = hiveDatabase.messageDAO();
     }
 
     public void insert(UserEntity userEntity) {
@@ -52,26 +52,6 @@ public class Repository {
 
     public List<UserEntity> searchAllUsers(String term) {
         return usersDAO.search(term);
-    }
-
-    public void insert(CurrentUserEntity currentUserEntity) {
-        currentUserDAO.insert(currentUserEntity);
-    }
-
-    public void update(CurrentUserEntity currentUserEntity) {
-        currentUserDAO.update(currentUserEntity);
-    }
-
-    public void delete(CurrentUserEntity currentUserEntity) {
-        currentUserDAO.delete(currentUserEntity);
-    }
-
-    public void deleteCurrentUser() {
-        currentUserDAO.deleteAll();
-    }
-
-    public List<CurrentUserEntity> getCurrentUser() {
-        return currentUserDAO.getAll();
     }
 
     public void insert(ChatUserEntity chatUserEntity) {
@@ -116,5 +96,29 @@ public class Repository {
 
     public long getTimeStamp(String term) {
         return recentSearchesDAO.getTimeStamp(term);
+    }
+
+    public void insert(MessageEntity messageEntity) {
+        messageDAO.insert(messageEntity);
+    }
+
+    public void update(MessageEntity messageEntity) {
+        messageDAO.update(messageEntity);
+    }
+
+    public void delete(MessageEntity messageEntity) {
+        messageDAO.delete(messageEntity);
+    }
+
+    public void deleteAllMessages() {
+        messageDAO.deleteAll();
+    }
+
+    public List<MessageEntity> getAllMessages() {
+        return messageDAO.getAll();
+    }
+
+    public List<MessageEntity> searchAllMessages(String term) {
+        return messageDAO.search(term);
     }
 }

@@ -18,10 +18,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/profile_pic"
+        android:adjustViewBounds="true"
         android:background="@drawable/rounded_edges"
         android:backgroundTint="@color/SecondaryLight"
         android:padding="8dp"
-        android:visibility="gone" />
+        android:scaleType="fitXY" />
 
     <TextView
         android:id="@+id/show_message"
@@ -34,13 +35,14 @@
         android:padding="8dp"
         android:text="hello"
         android:textColor="@color/PrimaryDark"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/text_view_time_stamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/show_message"
+        android:layout_below="@id/show_image"
         android:layout_marginStart="12dp"
         android:layout_marginTop="4dp"
         android:layout_toEndOf="@id/profile_pic"

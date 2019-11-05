@@ -29,9 +29,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.models.User;
-import com.interstellarstudios.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
 
 import es.dmoral.toasty.Toasty;
@@ -187,9 +185,6 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
                             userDetailsPath.update("username", username).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Repository repository = new Repository(getApplication());
-                                    GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-
                                     finish();
                                     overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
                                     hideKeyboard(UserNameActivity.this);

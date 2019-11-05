@@ -1,7 +1,6 @@
 package com.interstellarstudios.hive;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -24,19 +24,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.interstellarstudios.hive.adapters.RecentSearchesAdapter;
 import com.interstellarstudios.hive.adapters.UserAdapter;
 import com.interstellarstudios.hive.database.RecentSearchesEntity;
 import com.interstellarstudios.hive.database.UserEntity;
-import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
@@ -72,6 +66,12 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
         repository = new Repository(getApplication());
+
+        List<UserEntity> userEntityList = repository.getAllUsers();
+
+        for (UserEntity userEntity : userEntityList) {
+            Log.v("mylogtag", userEntity.getUsername());
+        }
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
@@ -146,56 +146,34 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
 
     private void setupSearch() {
 
-        repository.deleteAllUsers();
+        String searchTerm = searchField.getText().toString().trim().toLowerCase();
 
-        CollectionReference usersPath = mFireBaseFireStore.collection("User");
-        usersPath.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+        recentSearchesList.clear();
+        recentSearchesStringArrayList.clear();
 
-                                User user = document.toObject(User.class);
+        recentSearchesList = repository.getRecentSearches();
 
-                                if (!user.getId().equals(mCurrentUserId)) {
+        for (RecentSearchesEntity recentSearches : recentSearchesList) {
+            String recentSearchesListString = recentSearches.getSearchTerm();
+            recentSearchesStringArrayList.add(recentSearchesListString);
+        }
 
-                                    UserEntity userEntity = new UserEntity(user.getId(), user.getUsername(), user.getProfilePicUrl(), user.getOnlineOffline(), user.getStatus(), user.getEmailAddress());
-                                    repository.insert(userEntity);
-                                }
-                            }
-                            String searchTerm = searchField.getText().toString().trim().toLowerCase();
+        if (!recentSearchesStringArrayList.contains(searchTerm) && !searchTerm.equals("")) {
+            mRecentSearchesRecyclerView.setVisibility(View.VISIBLE);
+            long timeStamp = System.currentTimeMillis();
+            RecentSearchesEntity recentSearches = new RecentSearchesEntity(timeStamp, searchTerm);
+            repository.insert(recentSearches);
 
-                            recentSearchesList.clear();
-                            recentSearchesStringArrayList.clear();
+        } else if (recentSearchesStringArrayList.contains(searchTerm)) {
+            long timeStampQuery = repository.getTimeStamp(searchTerm);
+            RecentSearchesEntity recentSearchesOld = new RecentSearchesEntity(timeStampQuery, searchTerm);
+            repository.delete(recentSearchesOld);
 
-                            recentSearchesList = repository.getRecentSearches();
-
-                            for (RecentSearchesEntity recentSearches : recentSearchesList) {
-                                String recentSearchesListString = recentSearches.getSearchTerm();
-                                recentSearchesStringArrayList.add(recentSearchesListString);
-                            }
-
-                            if (!recentSearchesStringArrayList.contains(searchTerm) && !searchTerm.equals("")) {
-                                mRecentSearchesRecyclerView.setVisibility(View.VISIBLE);
-                                long timeStamp = System.currentTimeMillis();
-                                RecentSearchesEntity recentSearches = new RecentSearchesEntity(timeStamp, searchTerm);
-                                repository.insert(recentSearches);
-
-                            } else if (recentSearchesStringArrayList.contains(searchTerm)) {
-                                long timeStampQuery = repository.getTimeStamp(searchTerm);
-                                RecentSearchesEntity recentSearchesOld = new RecentSearchesEntity(timeStampQuery, searchTerm);
-                                repository.delete(recentSearchesOld);
-
-                                long timeStamp = System.currentTimeMillis();
-                                RecentSearchesEntity recentSearchesNew = new RecentSearchesEntity(timeStamp, searchTerm);
-                                repository.insert(recentSearchesNew);
-                            }
-
-                            performSearch(searchTerm);
-                        }
-                    }
-                });
+            long timeStamp = System.currentTimeMillis();
+            RecentSearchesEntity recentSearchesNew = new RecentSearchesEntity(timeStamp, searchTerm);
+            repository.insert(recentSearchesNew);
+        }
+        performSearch(searchTerm);
     }
 
     private void performSearch(String searchTerm) {
@@ -210,7 +188,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
             mUsers.add(user);
         }
 
-        UserAdapter userAdapter = new UserAdapter(context, mUsers, true);
+        UserAdapter userAdapter = new UserAdapter(context, mUsers, false);
         recyclerView.setAdapter(userAdapter);
 
         recentSearchesList = repository.getRecentSearches();
@@ -232,19 +210,17 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
     private void profilePicOperations() {
 
         DocumentReference currentUserRef = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-        currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    return;
-                }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
 
-                if (snapshot != null && snapshot.exists()) {
-                    User user = snapshot.toObject(User.class);
-                    if (user.getProfilePicUrl() != null) {
-                        Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
-                        GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
+                        User user = document.toObject(User.class);
+                        if (user.getProfilePicUrl() != null) {
+                            Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
+                        }
                     }
                 }
             }

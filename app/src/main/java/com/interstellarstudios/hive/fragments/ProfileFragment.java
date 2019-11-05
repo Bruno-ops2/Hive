@@ -1,6 +1,7 @@
 package com.interstellarstudios.hive.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -22,8 +24,6 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -38,9 +38,7 @@ import com.interstellarstudios.hive.R;
 import com.interstellarstudios.hive.RegisterActivity;
 import com.interstellarstudios.hive.StatusActivity;
 import com.interstellarstudios.hive.UserNameActivity;
-import com.interstellarstudios.hive.database.CurrentUserEntity;
 import com.interstellarstudios.hive.database.HiveDatabase;
-import com.interstellarstudios.hive.firestore.GetData;
 import com.interstellarstudios.hive.models.User;
 import com.interstellarstudios.hive.repository.Repository;
 import com.squareup.picasso.Picasso;
@@ -49,7 +47,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
@@ -82,23 +79,9 @@ public class ProfileFragment extends Fragment {
             mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
         }
 
-        List<CurrentUserEntity> currentUserEntityList = repository.getCurrentUser();
-
-        String username = null;
-        String profilePicUrl = null;
-        String status = null;
-        for (CurrentUserEntity currentUserEntity : currentUserEntityList) {
-            profilePicUrl = currentUserEntity.getProfilePicUrl();
-            username = currentUserEntity.getUsername();
-            status = currentUserEntity.getStatus();
-        }
-
         imageViewProfilePic = view.findViewById(R.id.image_view_profile_pic);
-        if (profilePicUrl != null) {
-            Picasso.get().load(profilePicUrl).into(imageViewProfilePic);
-        }
         textViewUsername = view.findViewById(R.id.text_view_username);
-        textViewUsername.setText(username);
+        textViewStatus = view.findViewById(R.id.text_view_status);
 
         imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,9 +89,6 @@ public class ProfileFragment extends Fragment {
                 openFileChooser();
             }
         });
-
-        textViewStatus = view.findViewById(R.id.text_view_status);
-        textViewStatus.setText(status);
 
         ImageView imageViewEditStatus = view.findViewById(R.id.image_view_change_status);
         imageViewEditStatus.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +111,35 @@ public class ProfileFragment extends Fragment {
         });
 
         ImageView clearSearchHistory = view.findViewById(R.id.image_view_bin_icon);
+
+        ImageView imageViewClearSearchHistoryIcon = view.findViewById(R.id.image_view_search_history_icon);
+        imageViewClearSearchHistoryIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                YoYo.with(Techniques.Wobble)
+                        .duration(750)
+                        .playOn(clearSearchHistory);
+
+                repository.deleteAllRecentSearches();
+                Toasty.success(context, "Search history cleared", Toast.LENGTH_LONG, true).show();
+            }
+        });
+
+        TextView textViewSearchHistory = view.findViewById(R.id.text_view_search_history);
+        textViewSearchHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                YoYo.with(Techniques.Wobble)
+                        .duration(750)
+                        .playOn(clearSearchHistory);
+
+                repository.deleteAllRecentSearches();
+                Toasty.success(context, "Search history cleared", Toast.LENGTH_LONG, true).show();
+            }
+        });
+
         clearSearchHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -168,7 +177,7 @@ public class ProfileFragment extends Fragment {
         textViewLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logOut();
+                startLogOut();
             }
         });
 
@@ -176,13 +185,30 @@ public class ProfileFragment extends Fragment {
         imageViewLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logOut();
+                startLogOut();
             }
         });
 
-        usernameOperations();
+        userDetailsOperations();
 
         return view;
+    }
+
+    private void startLogOut() {
+
+        new AlertDialog.Builder(context)
+                .setTitle("Log out")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        logOut();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
     }
 
     private void logOut() {
@@ -273,23 +299,13 @@ public class ProfileFragment extends Fragment {
                             String profilePicUrl = downloadUri.toString();
 
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.update("profilePicUrl", profilePicUrl).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toasty.error(context, "Error, please ensure that there is an active network connection", Toast.LENGTH_LONG, true).show();
-                                }
-                            });
+                            userDetailsPath.update("profilePicUrl", profilePicUrl);
                         }
                     }
                 });
     }
 
-    private void usernameOperations() {
+    private void userDetailsOperations() {
 
         DocumentReference currentUserRef = mFireBaseFireStore.collection("User").document(mCurrentUserId);
         currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -302,6 +318,11 @@ public class ProfileFragment extends Fragment {
 
                 if (snapshot != null && snapshot.exists()) {
                     User user = snapshot.toObject(User.class);
+
+                    if (user.getProfilePicUrl() != null) {
+                        Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
+                    }
+
                     textViewUsername.setText(user.getUsername());
                     textViewStatus.setText(user.getStatus());
                 }

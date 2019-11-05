@@ -49,14 +49,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             String channelId = "General Notifications";
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             NotificationCompat.Builder notificationBuilder =
-                    new NotificationCompat.Builder(this, channelId)
-                            .setSmallIcon(R.drawable.ic_notification)
-                            .setContentTitle(title)
-                            .setContentText(body)
-                            .setColor(getResources().getColor(R.color.Accent))
-                            .setAutoCancel(true)
-                            .setSound(defaultSoundUri)
-                            .setContentIntent(pendingIntent);
+                    new NotificationCompat.Builder(this, channelId);
+
+            notificationBuilder.setSmallIcon(R.drawable.ic_notification);
+            notificationBuilder.setContentTitle(title);
+
+            if (body.equals("")) {
+                notificationBuilder.setContentText("Media");
+            } else {
+                notificationBuilder.setContentText(body);
+            }
+
+            notificationBuilder.setColor(getResources().getColor(R.color.Accent));
+            notificationBuilder.setAutoCancel(true);
+            notificationBuilder.setSound(defaultSoundUri);
+            notificationBuilder.setContentIntent(pendingIntent);
 
             NotificationManager notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

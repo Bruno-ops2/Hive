@@ -1,9 +1,16 @@
 package com.interstellarstudios.hive.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,33 +23,60 @@ import com.interstellarstudios.hive.models.Message;
 import com.interstellarstudios.hive.repository.Repository;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> implements Filterable {
 
     private static final int MSG_TYPE_LEFT = 0;
     private static final int MSG_TYPE_RIGHT = 1;
+    private static final int MSG_TYPE_IMAGE_LEFT = 2;
+    private static final int MSG_TYPE_IMAGE_RIGHT = 3;
+    private static final int MSG_TYPE_ATTACHMENT_LEFT = 4;
+    private static final int MSG_TYPE_ATTACHMENT_RIGHT = 5;
     private Context mContext;
     private List<Message> mChat;
+    private List<Message> mChatFull;
     private boolean isSender;
     private Repository repository;
 
     public ChatAdapter(Context mContext, List<Message> mChat, Repository repository) {
+
         this.mContext = mContext;
         this.mChat = mChat;
+        mChatFull = new ArrayList<>(mChat);
         this.repository = repository;
     }
 
     @NonNull
     @Override
     public ChatAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == MSG_TYPE_RIGHT) {
+
+        if (viewType == MSG_TYPE_LEFT) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_left, parent, false);
+            return new ChatAdapter.ViewHolder(view);
+        } else if (viewType == MSG_TYPE_RIGHT) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_right, parent, false);
             return new ChatAdapter.ViewHolder(view);
+        } else if (viewType == MSG_TYPE_IMAGE_LEFT) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.image_item_left, parent, false);
+            return new ChatAdapter.ViewHolder(view);
+        } else if (viewType == MSG_TYPE_IMAGE_RIGHT){
+            View view = LayoutInflater.from(mContext).inflate(R.layout.image_item_right, parent, false);
+            return new ChatAdapter.ViewHolder(view);
+        } else if (viewType == MSG_TYPE_ATTACHMENT_LEFT) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.attachment_item_left, parent, false);
+            return new ChatAdapter.ViewHolder(view);
         } else {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_left, parent, false);
+            View view = LayoutInflater.from(mContext).inflate(R.layout.attachment_item_right, parent, false);
             return new ChatAdapter.ViewHolder(view);
         }
     }
@@ -52,10 +86,62 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
         Message message = mChat.get(position);
 
-        holder.textViewShowMessage.setText(message.getMessage());
+        if (message.getMessageType().equals("image")) {
+
+            if (fileExists(message.getImageFileName())) {
+                loadLocally(message.getImageFileName(), holder.imageViewChatImage);
+
+                holder.imageViewChatImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        String folder = Environment.getExternalStorageDirectory() + File.separator + "Hive/Images/";
+                        String file = folder + message.getImageFileName() + ".jpg";
+                        Uri uri = Uri.parse(file);
+
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(uri, "*/*");
+                        mContext.startActivity(intent);
+                    }
+                });
+
+            } else {
+
+                Picasso.get().load(message.getImageUrl()).into(holder.imageViewChatImage);
+                getImage(message.getImageUrl(), message.getImageFileName());
+
+                holder.imageViewChatImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Uri uri =  Uri.parse(message.getImageUrl());
+
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(uri, "*/*");
+                        mContext.startActivity(intent);
+                    }
+                });
+            }
+
+        } else if (message.getMessageType().equals("text")) {
+            holder.textViewShowMessage.setText(message.getMessage());
+
+        } else if (message.getMessageType().equals("attachment")) {
+            holder.imageViewChatImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(message.getImageUrl()));
+                    mContext.startActivity(browserIntent);
+                }
+            });
+        }
+
         holder.textViewTimeStamp.setText(getDate(message.getTimeStamp(), "HH:mm"));
 
-        profilePic(message.getSenderId(), holder.imageViewProfilePic);
+        profilePic(holder.imageViewProfilePic);
 
         if (isSender) {
 
@@ -81,6 +167,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private ImageView imageViewBlueTicks;
         private ImageView imageViewGreyTicks;
         private ImageView imageViewProfilePic;
+        private ImageView imageViewChatImage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -90,18 +177,34 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             imageViewBlueTicks = itemView.findViewById(R.id.image_view_blue_ticks);
             imageViewGreyTicks = itemView.findViewById(R.id.image_view_grey_ticks);
             imageViewProfilePic = itemView.findViewById(R.id.profile_pic);
+            imageViewChatImage = itemView.findViewById(R.id.show_image);
         }
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        if (mChat.get(position).getIsSender()) {
+        if (mChat.get(position).getIsSender() && mChat.get(position).getMessageType().equals("text")) {
             isSender = true;
             return MSG_TYPE_RIGHT;
-        } else {
+
+        } else if (!mChat.get(position).getIsSender() && mChat.get(position).getMessageType().equals("text")) {
             isSender = false;
             return MSG_TYPE_LEFT;
+
+        } else if (mChat.get(position).getIsSender() && mChat.get(position).getMessageType().equals("image")) {
+            isSender = true;
+            return MSG_TYPE_IMAGE_RIGHT;
+
+        } else if (!mChat.get(position).getIsSender() && mChat.get(position).getMessageType().equals("image")){
+            isSender = false;
+            return MSG_TYPE_IMAGE_LEFT;
+        } else if (mChat.get(position).getIsSender() && mChat.get(position).getMessageType().equals("attachment")) {
+            isSender = true;
+            return MSG_TYPE_ATTACHMENT_RIGHT;
+        } else {
+            isSender = false;
+            return MSG_TYPE_ATTACHMENT_LEFT;
         }
     }
 
@@ -113,7 +216,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return formatter.format(calendar.getTime());
     }
 
-    private void profilePic(String altUserId, ImageView imageProfilePic) {
+    private void profilePic(ImageView imageProfilePic) {
 
         List<ChatUserEntity> chatUserEntityList = repository.getChatUser();
 
@@ -122,24 +225,114 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             profilePicUrl = chatUserEntity.getProfilePicUrl();
         }
 
-        Picasso.get().load(profilePicUrl).into(imageProfilePic);
+        if (profilePicUrl != null) {
+            Picasso.get().load(profilePicUrl).into(imageProfilePic);
+        }
+    }
 
-        /*FirebaseFirestore mFireBaseFireStore = FirebaseFirestore.getInstance();
+    private void getImage(String imageUrl, String fileName) {
 
-        DocumentReference currentUserRef = mFireBaseFireStore.collection("User").document(altUserId);
-        currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    return;
+            public void run() {
+
+                Bitmap bitmap = getBitmapFromURL(imageUrl);
+
+                //External directory path to save file
+                String folder = Environment.getExternalStorageDirectory() + File.separator + "Hive/Images/";
+                //Create folder if it does not exist
+                File directory = new File(folder);
+                if (!directory.exists()) {
+                    directory.mkdirs();
                 }
 
-                if (snapshot != null && snapshot.exists()) {
-                    User user = snapshot.toObject(User.class);
-                    Picasso.get().load(user.getProfilePicUrl()).into(imageProfilePic);
+                try {
+                    FileOutputStream out = new FileOutputStream(folder + fileName + ".jpg");
+                    if (bitmap != null) {
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    }
+                    out.flush();
+                    out.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        });*/
+        });
+        thread.start();
     }
+
+    public static Bitmap getBitmapFromURL(String src) {
+
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            return BitmapFactory.decodeStream(input);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private boolean fileExists(String fileName) {
+
+        String filePath = Environment.getExternalStorageDirectory() + File.separator + "Hive/Images/" + fileName + ".jpg";
+
+        File file = new File(filePath);
+        if (file.exists()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void loadLocally(String fileName, ImageView imageView) {
+
+        String filePath = Environment.getExternalStorageDirectory() + File.separator + "Hive/Images/" + fileName + ".jpg";
+
+        File file = new File(filePath);
+        if (file.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            imageView.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return exampleFilter;
+    }
+
+    private Filter exampleFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Message> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(mChatFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (Message message : mChatFull) {
+                    if (message.getMessage().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(message);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mChat.clear();
+            mChat.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
 }

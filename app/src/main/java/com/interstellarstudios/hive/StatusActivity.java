@@ -24,8 +24,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.interstellarstudios.hive.firestore.GetData;
-import com.interstellarstudios.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
 
 import es.dmoral.toasty.Toasty;
@@ -159,9 +157,6 @@ public class StatusActivity extends AppCompatActivity implements Foreground.List
         userDetailsPath.update("status", status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Repository repository = new Repository(getApplication());
-                GetData.currentUser(mFireBaseFireStore, mCurrentUserId, repository);
-
                 finish();
                 overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
                 hideKeyboard(StatusActivity.this);

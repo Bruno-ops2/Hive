@@ -17,20 +17,6 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/show_image"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="64dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_toStartOf="@id/image_view_grey_ticks"
-            android:background="@drawable/rounded_edges"
-            android:backgroundTint="@color/Accent"
-            android:gravity="end"
-            android:padding="8dp"
-            android:visibility="gone" />
-
         <TextView
             android:id="@+id/show_message"
             android:layout_width="wrap_content"
@@ -45,13 +31,29 @@
             android:padding="8dp"
             android:text="hello"
             android:textColor="@color/PrimaryLight"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/show_image"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@id/image_view_grey_ticks"
+            android:adjustViewBounds="true"
+            android:background="@drawable/rounded_edges"
+            android:backgroundTint="@color/SecondaryLight"
+            android:gravity="end"
+            android:padding="8dp"
+            android:scaleType="fitXY" />
 
         <TextView
             android:id="@+id/text_view_time_stamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/show_message"
+            android:layout_below="@id/show_image"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:layout_toStartOf="@id/image_view_grey_ticks"
@@ -62,8 +64,8 @@
             android:id="@+id/image_view_blue_ticks"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_alignTop="@id/show_message"
-            android:layout_alignBottom="@id/show_message"
+            android:layout_alignTop="@id/show_image"
+            android:layout_alignBottom="@id/show_image"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="8dp"
             android:visibility="invisible"
@@ -73,8 +75,8 @@
             android:id="@+id/image_view_grey_ticks"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_alignTop="@id/show_message"
-            android:layout_alignBottom="@id/show_message"
+            android:layout_alignTop="@id/show_image"
+            android:layout_alignBottom="@id/show_image"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="8dp"
             android:visibility="invisible"

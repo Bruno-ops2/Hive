@@ -175,8 +175,8 @@
 
             <ImageView
                 android:id="@+id/image_view_bin_icon"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_search_history_icon"
                 app:layout_constraintEnd_toEndOf="@+id/switch_dark_mode"
                 app:layout_constraintStart_toStartOf="@+id/switch_dark_mode"
