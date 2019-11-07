@@ -2,10 +2,13 @@ package com.interstellarstudios.hive.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +44,8 @@ import com.interstellarstudios.hive.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class ChatsFragment extends Fragment {
 
     private Context context;
@@ -51,6 +58,8 @@ public class ChatsFragment extends Fragment {
     private String mCurrentUserId;
     private List<RecentSearchesEntity> recentSearchesList = new ArrayList<>();
     private ArrayList<String> recentSearchesStringArrayList = new ArrayList<>();
+    private ConstraintLayout layout;
+    private SharedPreferences sharedPreferences;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,10 +95,30 @@ public class ChatsFragment extends Fragment {
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
+        layout = view.findViewById(R.id.container);
+
+        sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        if (darkModeOn) {
+            darkMode();
+        } else {
+            lightMode();
+        }
+
         readChats();
         setupSearchSuggestions();
 
         return view;
+    }
+
+    private void lightMode() {
+
+        layout.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+    }
+
+    private void darkMode() {
+
+        layout.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
     }
 
     private void readChats() {
@@ -138,7 +167,7 @@ public class ChatsFragment extends Fragment {
                     }
                 }
 
-                UserAdapter userAdapter = new UserAdapter(context, mUsers, true);
+                UserAdapter userAdapter = new UserAdapter(context, mUsers, true, sharedPreferences);
                 recyclerView.setAdapter(userAdapter);
             }
         });

@@ -33,12 +33,4 @@
         android:textColor="@color/PrimaryDark"
         android:textSize="22sp" />
 
-    <ImageView
-        android:id="@+id/image_view_new_chat"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="end"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_pen" />
-
 </androidx.appcompat.widget.Toolbar>

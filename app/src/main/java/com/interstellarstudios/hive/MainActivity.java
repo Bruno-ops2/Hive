@@ -20,7 +20,6 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -65,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     private Foreground.Binding listenerBinding;
     private BottomNavigationView bottomNav;
     private static final int PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST = 13;
+    private Toolbar toolbar;
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             getPermissionToWriteStorage();
         }
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
             container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
@@ -136,12 +138,57 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_SELECTED);
 
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        if (darkModeOn) {
+            darkMode();
+        } else {
+            lightMode();
+        }
+
         profilePicOperations();
         unreadMessages();
         registerToken();
         searchSetup();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
+    }
+
+    private void lightMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        bottomNav.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        bottomNav.setItemIconTintList(ContextCompat.getColorStateList(context, R.color.bottom_nav_selector));
+    }
+
+    private void darkMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        bottomNav.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        bottomNav.setItemIconTintList(ContextCompat.getColorStateList(context, R.color.bottom_nav_selector_light));
     }
 
     public void getPermissionToWriteStorage() {

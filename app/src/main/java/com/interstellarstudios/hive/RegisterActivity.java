@@ -23,8 +23,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -223,42 +221,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         textViewSignIn.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(imageViewHiveLogo);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextEmail);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextPassword);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextConfirmPassword);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSignUp);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSignUpLater);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewOr);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn2);
-
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
@@ -285,42 +247,6 @@ public class RegisterActivity extends AppCompatActivity {
         editTextConfirmPassword.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
 
         textViewSignIn.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(imageViewHiveLogo);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextEmail);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextPassword);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextConfirmPassword);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSignUp);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSignUpLater);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewOr);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn2);
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         if (container != null) {

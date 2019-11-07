@@ -19,8 +19,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -133,22 +131,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
         editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(imageViewHiveLogo);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextEmail);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSendLink);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn);
-
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
@@ -169,22 +151,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         editTextEmail.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         editTextEmail.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(imageViewHiveLogo);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(editTextEmail);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(buttonSendLink);
-
-        YoYo.with(Techniques.FadeIn)
-                .duration(500)
-                .playOn(textViewSignIn);
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         if (container != null) {

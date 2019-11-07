@@ -5,8 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -110,13 +113,20 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
     private AutoCompleteTextView searchField;
     private String filePath;
     private String fileName;
+    private Toolbar toolbar;
+    private ImageView imageViewBack;
+    private SharedPreferences sharedPreferences;
+    private ConstraintLayout sendMessageContainer;
+    private ImageView searchImageView;
+    private ImageView backArrowImageView;
+    private ImageView sharedImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
         currentUsername = sharedPreferences.getString("username", "");
 
         mFireBaseFireStore = FirebaseFirestore.getInstance();
@@ -131,6 +141,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
         window = this.getWindow();
         container = findViewById(R.id.container);
+        sendMessageContainer = findViewById(R.id.send_message_container);
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
@@ -138,7 +149,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -170,7 +181,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
 
-        ImageView imageViewBack = findViewById(R.id.image_view_back);
+        imageViewBack = findViewById(R.id.image_view_back);
         imageViewBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,9 +209,10 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
 
-        ImageView backArrowImageView = findViewById(R.id.image_view_back_arrow);
+        backArrowImageView = findViewById(R.id.image_view_back_arrow);
+        sharedImageView = findViewById(R.id.image_view_share);
 
-        ImageView searchImageView = findViewById(R.id.image_view_search);
+        searchImageView = findViewById(R.id.image_view_search);
         searchImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -385,6 +397,13 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
 
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        if (darkModeOn) {
+            darkMode();
+        } else {
+            lightMode();
+        }
+
         getChatUserData();
         readMessages();
         seenMessage();
@@ -392,6 +411,58 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
         searchSetup();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
+    }
+
+    private void lightMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        sendMessageContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        recyclerView.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
+        ImageViewCompat.setImageTintList(backArrowImageView, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
+        ImageViewCompat.setImageTintList(sharedImageView, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
+        ImageViewCompat.setImageTintList(searchImageView, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
+
+        searchField.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        searchField.setHintTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        DrawableCompat.setTint(searchField.getBackground(), ContextCompat.getColor(context, R.color.SecondaryDark));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+    }
+
+    private void darkMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        sendMessageContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        recyclerView.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(backArrowImageView, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(sharedImageView, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(searchImageView, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
+
+        searchField.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        searchField.setHintTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        DrawableCompat.setTint(searchField.getBackground(), ContextCompat.getColor(context, R.color.PrimaryLight));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
     }
 
     private void sendMessage(String message) {
@@ -436,7 +507,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
                     mChat.add(message);
 
-                    chatAdapter = new ChatAdapter(context, mChat, repository);
+                    chatAdapter = new ChatAdapter(context, mChat, repository, sharedPreferences);
                     recyclerView.setAdapter(chatAdapter);
                 }
             }
@@ -522,7 +593,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
                             Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
                         }
 
-                        chatAdapter = new ChatAdapter(context, mChat, repository);
+                        chatAdapter = new ChatAdapter(context, mChat, repository, sharedPreferences);
                         recyclerView.setAdapter(chatAdapter);
                     }
                 }

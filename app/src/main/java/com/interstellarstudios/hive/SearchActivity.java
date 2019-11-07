@@ -4,13 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -57,6 +57,9 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
     private List<RecentSearchesEntity> recentSearchesList = new ArrayList<>();
     private ArrayList<String> recentSearchesStringArrayList = new ArrayList<>();
     private SharedPreferences sharedPreferences;
+    private Toolbar toolbar;
+    private ImageView imageViewBack;
+    private TextView textViewFragmentTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +70,6 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
 
         repository = new Repository(getApplication());
 
-        List<UserEntity> userEntityList = repository.getAllUsers();
-
-        for (UserEntity userEntity : userEntityList) {
-            Log.v("mylogtag", userEntity.getUsername());
-        }
-
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
         FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -80,7 +77,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
             mCurrentUserId = firebaseUser.getUid();
         }
 
-        ImageView imageViewBack = findViewById(R.id.image_view_back);
+        imageViewBack = findViewById(R.id.image_view_back);
         imageViewBack.setVisibility(View.VISIBLE);
         imageViewBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,11 +105,11 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
             container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
-        TextView textViewFragmentTitle = findViewById(R.id.text_view_fragment_title);
+        textViewFragmentTitle = findViewById(R.id.text_view_fragment_title);
         textViewFragmentTitle.setText("Search Results");
 
         Bundle bundle = getIntent().getExtras();
@@ -139,9 +136,51 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        if (darkModeOn) {
+            darkMode();
+        } else {
+            lightMode();
+        }
+
         profilePicOperations();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
+    }
+
+    private void lightMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+    }
+
+    private void darkMode() {
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
     }
 
     private void setupSearch() {
@@ -188,7 +227,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
             mUsers.add(user);
         }
 
-        UserAdapter userAdapter = new UserAdapter(context, mUsers, false);
+        UserAdapter userAdapter = new UserAdapter(context, mUsers, false, sharedPreferences);
         recyclerView.setAdapter(userAdapter);
 
         recentSearchesList = repository.getRecentSearches();

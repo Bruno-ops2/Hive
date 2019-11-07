@@ -2,6 +2,7 @@ package com.interstellarstudios.hive.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.interstellarstudios.hive.R;
@@ -47,13 +49,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> im
     private List<Message> mChatFull;
     private boolean isSender;
     private Repository repository;
+    private boolean darkModeOn;
 
-    public ChatAdapter(Context mContext, List<Message> mChat, Repository repository) {
+    public ChatAdapter(Context mContext, List<Message> mChat, Repository repository, SharedPreferences sharedPreferences) {
 
         this.mContext = mContext;
         this.mChat = mChat;
         mChatFull = new ArrayList<>(mChat);
         this.repository = repository;
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
     }
 
     @NonNull
@@ -85,6 +89,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> im
     public void onBindViewHolder(@NonNull ChatAdapter.ViewHolder holder, int position) {
 
         Message message = mChat.get(position);
+
+        if (darkModeOn) {
+            holder.textViewTimeStamp.setTextColor(ContextCompat.getColor(mContext, R.color.PrimaryLight));
+        }
 
         if (message.getMessageType().equals("image")) {
 

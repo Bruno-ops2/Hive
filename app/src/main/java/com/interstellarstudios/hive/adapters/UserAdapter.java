@@ -3,6 +3,7 @@ package com.interstellarstudios.hive.adapters;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -47,11 +49,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private boolean isChat;
     private boolean isRead;
     private String messageType;
+    private boolean darkModeOn;
 
-    public UserAdapter(Context mContext, List<User> mUsers, boolean isChat) {
+    public UserAdapter(Context mContext, List<User> mUsers, boolean isChat, SharedPreferences sharedPreferences) {
         this.mContext = mContext;
         this.mUsers = mUsers;
         this.isChat = isChat;
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
     }
 
     @NonNull
@@ -64,6 +68,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = mUsers.get(position);
+
+        if (darkModeOn) {
+            holder.username.setTextColor(ContextCompat.getColor(mContext, R.color.PrimaryLight));
+            holder.textViewLastMessage.setTextColor(ContextCompat.getColor(mContext, R.color.PrimaryLight));
+            holder.textViewTimeStamp.setTextColor(ContextCompat.getColor(mContext, R.color.PrimaryLight));
+            holder.imageViewStatusOnline.setImageResource(R.drawable.circle_online_dark);
+        }
 
         holder.username.setText(user.getUsername());
 

@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.interstellarstudios.hive.R;
@@ -24,7 +25,7 @@ public class RecentSearchesAdapter extends RecyclerView.Adapter<RecentSearchesAd
 
     private List<RecentSearchesEntity> recentSearchesList;
     private final OnItemClickListener listener;
-    private SharedPreferences sharedPreferences;
+    private boolean darkModeOn;
     private Context context;
 
     class RecentSearchesViewHolder extends RecyclerView.ViewHolder {
@@ -54,7 +55,7 @@ public class RecentSearchesAdapter extends RecyclerView.Adapter<RecentSearchesAd
         this.recentSearchesList = recentSearchesList;
         this.listener = listener;
         this.context = context;
-        this.sharedPreferences = sharedPreferences;
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
     }
 
     @NonNull
@@ -70,7 +71,9 @@ public class RecentSearchesAdapter extends RecyclerView.Adapter<RecentSearchesAd
         holder.bind(recentSearchesList.get(position), listener);
         RecentSearchesEntity currentItem = recentSearchesList.get(position);
 
-        boolean switchThemesOnOff = sharedPreferences.getBoolean("switchThemes", true);
+        if (darkModeOn) {
+            holder.searchTermTextView.setTextColor(ContextCompat.getColor(context, R.color.SecondaryLight));
+        }
 
         String searchTerm = currentItem.getSearchTerm();
         holder.searchTermTextView.setText(searchTerm);

@@ -3,6 +3,7 @@ package com.interstellarstudios.hive.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -11,12 +12,18 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +32,7 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -51,6 +59,7 @@ import java.io.InputStream;
 import es.dmoral.toasty.Toasty;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 public class ProfileFragment extends Fragment {
 
@@ -63,6 +72,18 @@ public class ProfileFragment extends Fragment {
     private ImageView imageViewProfilePic;
     private TextView textViewUsername;
     private TextView textViewStatus;
+    private SharedPreferences sharedPreferences;
+    private ConstraintLayout layout;
+    private TextView textViewDarkMode;
+    private TextView textViewEditStatus;
+    private TextView textViewSearchHistory;
+    private TextView textViewEditUsername;
+    private TextView textViewLogout;
+    private ImageView imageViewCameraIcon;
+    private Toolbar toolbar;
+    private TextView textViewFragmentTitle;
+    private Window window;
+    private BottomNavigationView bottomNav;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,6 +91,9 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         context = getActivity();
+
+        sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
 
         repository = new Repository(getActivity().getApplication());
 
@@ -79,9 +103,13 @@ public class ProfileFragment extends Fragment {
             mCurrentUserId = mFireBaseAuth.getCurrentUser().getUid();
         }
 
+        layout = view.findViewById(R.id.container2);
+        textViewDarkMode = view.findViewById(R.id.text_view_dark_mode);
+
         imageViewProfilePic = view.findViewById(R.id.image_view_profile_pic);
         textViewUsername = view.findViewById(R.id.text_view_username);
         textViewStatus = view.findViewById(R.id.text_view_status);
+        imageViewCameraIcon = view.findViewById(R.id.image_view_camera_icon);
 
         imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +128,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        TextView textViewEditStatus = view.findViewById(R.id.text_view_change_status);
+        textViewEditStatus = view.findViewById(R.id.text_view_change_status);
         textViewEditStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,7 +154,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        TextView textViewSearchHistory = view.findViewById(R.id.text_view_search_history);
+        textViewSearchHistory = view.findViewById(R.id.text_view_search_history);
         textViewSearchHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,7 +181,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        TextView textViewEditUsername = view.findViewById(R.id.text_view_change_username);
+        textViewEditUsername = view.findViewById(R.id.text_view_change_username);
         textViewEditUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,7 +201,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        TextView textViewLogout = view.findViewById(R.id.text_view_logout);
+        textViewLogout = view.findViewById(R.id.text_view_logout);
         textViewLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,9 +217,114 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        window = getActivity().getWindow();
+
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        textViewFragmentTitle = getActivity().findViewById(R.id.text_view_fragment_title);
+        bottomNav = getActivity().findViewById(R.id.bottom_nav);
+
+        Switch switchDarkMode = view.findViewById(R.id.switch_dark_mode);
+        switchDarkMode.setChecked(darkModeOn);
+        if (darkModeOn) {
+            darkMode();
+        } else {
+            lightMode();
+        }
+
+        switchDarkMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    darkMode();
+                    saveDarkModePreference();
+                } else {
+                    lightMode();
+                    saveLightModePreference();
+                }
+            }
+        });
+
         userDetailsOperations();
 
         return view;
+    }
+
+    private void saveLightModePreference() {
+
+        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        prefsEditor.putBoolean("darkModeOn", false);
+        prefsEditor.apply();
+    }
+
+    private void saveDarkModePreference() {
+
+        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        prefsEditor.putBoolean("darkModeOn", true);
+        prefsEditor.apply();
+    }
+
+    private void lightMode() {
+
+        View container = getActivity().findViewById(R.id.container);
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
+
+        bottomNav.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        bottomNav.setItemIconTintList(ContextCompat.getColorStateList(context, R.color.bottom_nav_selector));
+
+        layout.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+
+        textViewUsername.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewStatus.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewDarkMode.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewSearchHistory.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewEditUsername.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewEditStatus.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewLogout.setTextColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        imageViewCameraIcon.setImageResource(R.drawable.camera_icon);
+    }
+
+    private void darkMode() {
+
+        View container = getActivity().findViewById(R.id.container);
+
+        if (container != null) {
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+
+        bottomNav.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        bottomNav.setItemIconTintList(ContextCompat.getColorStateList(context, R.color.bottom_nav_selector_light));
+
+        layout.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+
+        textViewUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewStatus.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewDarkMode.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewSearchHistory.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewEditUsername.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewEditStatus.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        textViewLogout.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        imageViewCameraIcon.setImageResource(R.drawable.camera_icon_dark);
     }
 
     private void startLogOut() {
