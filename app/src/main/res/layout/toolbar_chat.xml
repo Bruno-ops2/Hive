@@ -24,7 +24,6 @@
         android:id="@+id/text_view_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/lato_bold"
         android:textColor="@color/PrimaryDark"
         android:textSize="18sp" />
 
@@ -61,7 +60,6 @@
         android:backgroundTint="@color/SecondaryDark"
         android:completionThreshold="1"
         android:ems="10"
-        android:fontFamily="@font/lato"
         android:hint="Search messages..."
         android:imeOptions="actionSearch"
         android:inputType="text"

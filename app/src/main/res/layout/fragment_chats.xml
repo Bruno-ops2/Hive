@@ -19,7 +19,6 @@
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="8dp"
         android:ems="10"
-        android:fontFamily="@font/lato"
         android:hint="Search"
         android:imeOptions="actionSearch"
         android:inputType="text"

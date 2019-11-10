@@ -68,10 +68,6 @@
             android:name=".SearchActivity"
             android:windowSoftInputMode="stateHidden" />
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-
         <service
             android:name=".util.MyFirebaseMessagingService"
             android:exported="false">

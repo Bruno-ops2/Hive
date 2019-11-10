@@ -28,9 +28,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:fontFamily="@font/lato_bold"
         android:text="Fragment"
         android:textColor="@color/PrimaryDark"
-        android:textSize="22sp" />
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
 </androidx.appcompat.widget.Toolbar>
