@@ -143,12 +143,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
         container = findViewById(R.id.container);
         sendMessageContainer = findViewById(R.id.send_message_container);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -415,10 +409,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
     private void lightMode() {
 
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         sendMessageContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         recyclerView.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
@@ -440,10 +430,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
     }
 
     private void darkMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
 
         sendMessageContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         recyclerView.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));

@@ -74,12 +74,6 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
@@ -91,10 +85,6 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
     }
 
     private void lightMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_dark);
 
@@ -121,10 +111,6 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
     }
 
     private void darkMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
 
         imageViewHiveLogo.setImageResource(R.drawable.hive_text_logo_light);
 

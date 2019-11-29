@@ -67,8 +67,10 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
         setContentView(R.layout.activity_search);
 
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-
         repository = new Repository(getApplication());
+
+        window = this.getWindow();
+        container = findViewById(R.id.container);
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
@@ -95,15 +97,6 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
         mRecentSearchesRecyclerView = findViewById(R.id.recent_searches_recycler);
         mRecentSearchesRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mRecentSearchesRecyclerView.setNestedScrollingEnabled(false);
-
-        window = this.getWindow();
-        container = findViewById(R.id.container);
-
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
 
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
@@ -150,36 +143,28 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
 
     private void lightMode() {
 
+        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         if (container != null) {
+            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
         ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryDark));
-
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
     }
 
     private void darkMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
-
-        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
 
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         if (container != null) {
             container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         }
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        ImageViewCompat.setImageTintList(imageViewBack, ContextCompat.getColorStateList(context, R.color.PrimaryLight));
     }
 
     private void setupSearch() {

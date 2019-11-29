@@ -35,15 +35,12 @@ public class SignInActivity extends AppCompatActivity {
     private ImageView imageViewHiveLogo;
     private EditText editTextEmail;
     private EditText editTextPassword;
-    private Button buttonSignIn;
     private Window window;
     private View container;
     private ImageView imageViewDarkMode;
     private ImageView imageViewLightMode;
     private TextView textViewRegister;
-    private TextView textViewRegister2;
     private TextView textViewForgotPassword;
-    private TextView textViewForgotPassword2;
     private SharedPreferences sharedPreferences;
     private FirebaseAuth mFireBaseAuth;
     private FirebaseFirestore mFireBaseFireStore;
@@ -64,8 +61,8 @@ public class SignInActivity extends AppCompatActivity {
         imageViewHiveLogo = findViewById(R.id.image_view_hive_logo);
         editTextEmail = findViewById(R.id.edit_text_email);
         editTextPassword = findViewById(R.id.edit_text_password);
-        buttonSignIn = findViewById(R.id.button_sign_in);
 
+        Button buttonSignIn = findViewById(R.id.button_sign_in);
         buttonSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +78,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        textViewRegister2 = findViewById(R.id.text_view_go_to_register_2);
+        TextView textViewRegister2 = findViewById(R.id.text_view_go_to_register_2);
         textViewRegister2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,7 +96,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        textViewForgotPassword2 = findViewById(R.id.text_view_go_to_forgot_password_2);
+        TextView textViewForgotPassword2 = findViewById(R.id.text_view_go_to_forgot_password_2);
         textViewForgotPassword2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,12 +111,6 @@ public class SignInActivity extends AppCompatActivity {
 
         window = this.getWindow();
         container = findViewById(R.id.container2);
-
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
 
         boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
@@ -161,10 +152,6 @@ public class SignInActivity extends AppCompatActivity {
 
     private void lightMode() {
 
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         imageViewLightMode.setVisibility(View.GONE);
         imageViewDarkMode.setVisibility(View.VISIBLE);
 
@@ -186,10 +173,6 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void darkMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
 
         imageViewDarkMode.setVisibility(View.GONE);
         imageViewLightMode.setVisibility(View.VISIBLE);

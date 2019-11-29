@@ -84,6 +84,7 @@ public class ProfileFragment extends Fragment {
     private TextView textViewFragmentTitle;
     private Window window;
     private BottomNavigationView bottomNav;
+    private View containerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,6 +92,9 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         context = getActivity();
+
+        containerView = getActivity().findViewById(R.id.container);
+        window = getActivity().getWindow();
 
         sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
         boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
@@ -217,8 +221,6 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        window = getActivity().getWindow();
-
         toolbar = getActivity().findViewById(R.id.toolbar);
         textViewFragmentTitle = getActivity().findViewById(R.id.text_view_fragment_title);
         bottomNav = getActivity().findViewById(R.id.bottom_nav);
@@ -265,16 +267,10 @@ public class ProfileFragment extends Fragment {
 
     private void lightMode() {
 
-        View container = getActivity().findViewById(R.id.container);
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
+        if (containerView != null) {
+            containerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            containerView.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         }
 
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
@@ -297,16 +293,10 @@ public class ProfileFragment extends Fragment {
 
     private void darkMode() {
 
-        View container = getActivity().findViewById(R.id.container);
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
-
         window.setStatusBarColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
+        if (containerView != null) {
+            containerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            containerView.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         }
 
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));

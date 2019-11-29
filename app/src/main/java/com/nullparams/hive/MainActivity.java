@@ -116,12 +116,6 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         window = this.getWindow();
         container = findViewById(R.id.container);
 
-        window.setStatusBarColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        if (container != null) {
-            container.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -155,10 +149,6 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
 
     private void lightMode() {
 
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
-        }
-
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.PrimaryLight));
         textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryDark));
 
@@ -173,10 +163,6 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     }
 
     private void darkMode() {
-
-        if (container != null) {
-            container.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
-        }
 
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.SecondaryDark));
         textViewFragmentTitle.setTextColor(ContextCompat.getColor(context, R.color.PrimaryLight));
