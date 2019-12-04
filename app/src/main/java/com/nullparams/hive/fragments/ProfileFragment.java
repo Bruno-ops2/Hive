@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -93,11 +94,14 @@ public class ProfileFragment extends Fragment {
 
         context = getActivity();
 
+        AutoCompleteTextView searchField = getActivity().findViewById(R.id.searchField);
+        searchField.setVisibility(View.GONE);
+
         containerView = getActivity().findViewById(R.id.container);
         window = getActivity().getWindow();
 
         sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
 
         repository = new Repository(getActivity().getApplication());
 
@@ -128,7 +132,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent i = new Intent(context, StatusActivity.class);
                 startActivity(i);
-                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -138,7 +141,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent i = new Intent(context, StatusActivity.class);
                 startActivity(i);
-                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -191,7 +193,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent i = new Intent(context, UserNameActivity.class);
                 startActivity(i);
-                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -201,7 +202,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent i = new Intent(context, UserNameActivity.class);
                 startActivity(i);
-                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 

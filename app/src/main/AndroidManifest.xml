@@ -18,8 +18,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/NoActionBar">
+        <activity android:name=".AddUsersActivity"></activity>
         <activity
-            android:name="com.nullparams.hive.RegisterActivity"
+            android:name=".RegisterActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
@@ -37,26 +38,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nullparams.hive.SignInActivity"
+            android:name=".SignInActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.nullparams.hive.ForgotPasswordActivity"
+            android:name=".ForgotPasswordActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.nullparams.hive.MainActivity"
+            android:name=".MainActivity"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
         <activity
-            android:name="com.nullparams.hive.UserNameActivity"
+            android:name=".UserNameActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.nullparams.hive.StatusActivity"
+            android:name=".StatusActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.nullparams.hive.ProfileViewActivity"
+            android:name=".ProfileViewActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.nullparams.hive.ChatActivity"
+            android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="com.nullparams.hive.FirebasePushNotifications.TARGETNOTIFICATIONCHAT" />
@@ -65,11 +66,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nullparams.hive.SearchActivity"
+            android:name=".SearchActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".GroupEditActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".GroupMessageActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".CreateGroupActivity"
             android:windowSoftInputMode="stateHidden" />
 
         <service
-            android:name="com.nullparams.hive.util.MyFirebaseMessagingService"
+            android:name=".util.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -92,7 +102,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
     </application>
 
 </manifest>

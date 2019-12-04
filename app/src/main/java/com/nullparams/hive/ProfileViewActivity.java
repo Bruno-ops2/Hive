@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,7 +59,7 @@ public class ProfileViewActivity extends AppCompatActivity {
             Picasso.get().load(profilePicUrl).into(imageViewProfilePic);
         }
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -94,6 +95,5 @@ public class ProfileViewActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
-        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
     }
 }

@@ -68,7 +68,7 @@ public class StatusActivity extends AppCompatActivity implements Foreground.List
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -144,7 +144,6 @@ public class StatusActivity extends AppCompatActivity implements Foreground.List
             @Override
             public void onSuccess(Void aVoid) {
                 finish();
-                overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
                 hideKeyboard(StatusActivity.this);
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -159,7 +158,6 @@ public class StatusActivity extends AppCompatActivity implements Foreground.List
     public void onBackPressed() {
         super.onBackPressed();
         finish();
-        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
     }
 
     public static void hideKeyboard(Activity activity) {

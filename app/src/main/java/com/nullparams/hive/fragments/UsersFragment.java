@@ -1,11 +1,9 @@
 package com.nullparams.hive.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -13,17 +11,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -33,11 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nullparams.hive.R;
-import com.nullparams.hive.SearchActivity;
 import com.nullparams.hive.adapters.UserAdapter;
-import com.nullparams.hive.database.RecentSearchesEntity;
 import com.nullparams.hive.models.User;
-import com.nullparams.hive.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,21 +38,20 @@ public class UsersFragment extends Fragment {
     private Context context;
     private RecyclerView recyclerView;
     private List<User> mUsers = new ArrayList<>();
-    private ArrayList<String> searchSuggestions = new ArrayList<>();
-    private AutoCompleteTextView searchField;
     private FirebaseFirestore mFireBaseFireStore;
     private String mCurrentUserId;
-    private List<RecentSearchesEntity> recentSearchesList = new ArrayList<>();
-    private ArrayList<String> recentSearchesStringArrayList = new ArrayList<>();
     private ConstraintLayout layout;
     private SharedPreferences sharedPreferences;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_users, container, false);
+        View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
         context = getActivity();
+
+        AutoCompleteTextView searchField = getActivity().findViewById(R.id.searchField);
+        searchField.setVisibility(View.VISIBLE);
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         mFireBaseFireStore = FirebaseFirestore.getInstance();
@@ -76,26 +64,10 @@ public class UsersFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        searchField = view.findViewById(R.id.searchField);
-        searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            public boolean onEditorAction(TextView v, int actionId,
-                                          KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    search();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_list_item_1, searchSuggestions);
-        searchField.setAdapter(adapter);
-
         layout = view.findViewById(R.id.container);
 
         sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -103,8 +75,6 @@ public class UsersFragment extends Fragment {
         }
 
         readUsers();
-        setupSearchSuggestions();
-
         return view;
     }
 
@@ -139,69 +109,9 @@ public class UsersFragment extends Fragment {
                         mUsers.add(user);
                     }
                 }
-                UserAdapter userAdapter = new UserAdapter(context, mUsers, false, sharedPreferences);
+                UserAdapter userAdapter = new UserAdapter(context, mUsers, false, sharedPreferences, false, false, null, null);
                 recyclerView.setAdapter(userAdapter);
             }
         });
-    }
-
-    private void setupSearchSuggestions() {
-
-        searchSuggestions.clear();
-
-        CollectionReference userListReference = mFireBaseFireStore.collection("User");
-        userListReference.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                User user = document.toObject(User.class);
-
-                                if (!user.getId().equals(mCurrentUserId)) {
-                                    searchSuggestions.add(user.getUsername());
-                                }
-                            }
-                        }
-                    }
-                });
-    }
-
-    private void search() {
-
-        String searchTerm = searchField.getText().toString().trim().toLowerCase();
-
-        recentSearchesList.clear();
-        recentSearchesStringArrayList.clear();
-
-        Repository repository = new Repository(getActivity().getApplication());
-        recentSearchesList = repository.getRecentSearches();
-
-        for (RecentSearchesEntity recentSearches : recentSearchesList) {
-            String recentSearchesListString = recentSearches.getSearchTerm();
-            recentSearchesStringArrayList.add(recentSearchesListString);
-        }
-
-        if (!recentSearchesStringArrayList.contains(searchTerm) && !searchTerm.equals("")) {
-            long timeStamp = System.currentTimeMillis();
-            RecentSearchesEntity recentSearches = new RecentSearchesEntity(timeStamp, searchTerm);
-            repository.insert(recentSearches);
-
-        } else if (recentSearchesStringArrayList.contains(searchTerm)) {
-            long timeStampQuery = repository.getTimeStamp(searchTerm);
-            RecentSearchesEntity recentSearchesOld = new RecentSearchesEntity(timeStampQuery, searchTerm);
-            repository.delete(recentSearchesOld);
-
-            long timeStamp = System.currentTimeMillis();
-            RecentSearchesEntity recentSearchesNew = new RecentSearchesEntity(timeStamp, searchTerm);
-            repository.insert(recentSearchesNew);
-        }
-
-        Intent i = new Intent(context, SearchActivity.class);
-        i.putExtra("searchTerm", searchTerm);
-        i.putExtra("searchSuggestions", searchSuggestions);
-        startActivity(i);
-        getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 }

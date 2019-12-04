@@ -12,21 +12,23 @@
         android:layout_height="35dp"
         android:src="@drawable/empty_profile_pic" />
 
-    <ImageView
-        android:id="@+id/show_image"
-        android:layout_width="250dp"
+    <TextView
+        android:id="@+id/show_username"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_toEndOf="@id/profile_pic"
-        android:background="@drawable/rounded_edges"
-        android:backgroundTint="@color/SecondaryLight"
         android:padding="8dp"
+        android:text="username"
+        android:textColor="@color/PrimaryDark"
+        android:textSize="12sp"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/show_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/show_username"
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/profile_pic"
         android:background="@drawable/rounded_edges"

@@ -129,7 +129,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -211,7 +211,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
             mUsers.add(user);
         }
 
-        UserAdapter userAdapter = new UserAdapter(context, mUsers, false, sharedPreferences);
+        UserAdapter userAdapter = new UserAdapter(context, mUsers, false, sharedPreferences, false, false, null, null);
         recyclerView.setAdapter(userAdapter);
 
         recentSearchesList = repository.getRecentSearches();
@@ -272,6 +272,5 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
     public void onBackPressed() {
         super.onBackPressed();
         finish();
-        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
     }
 }

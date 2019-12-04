@@ -28,19 +28,11 @@
         android:textSize="18sp" />
 
     <ImageView
-        android:id="@+id/image_view_share"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="end"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_share" />
-
-    <ImageView
         android:id="@+id/image_view_search"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_search_black" />
 
     <ImageView

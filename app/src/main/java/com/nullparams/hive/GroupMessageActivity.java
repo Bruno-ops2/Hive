@@ -59,14 +59,16 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.nullparams.hive.adapters.ChatAdapter;
-import com.nullparams.hive.database.ChatUserEntity;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
+import com.nullparams.hive.adapters.GroupMessageAdapter;
 import com.nullparams.hive.database.MessageEntity;
+import com.nullparams.hive.models.Group;
+import com.nullparams.hive.models.GroupMessage;
+import com.nullparams.hive.models.GroupParticipant;
 import com.nullparams.hive.models.Message;
 import com.nullparams.hive.models.User;
 import com.nullparams.hive.repository.Repository;
-import com.nbsp.materialfilepicker.MaterialFilePicker;
-import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.sjl.foreground.Foreground;
 import com.squareup.picasso.Picasso;
 
@@ -77,29 +79,24 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
-public class ChatActivity extends AppCompatActivity implements Foreground.Listener {
+public class GroupMessageActivity extends AppCompatActivity implements Foreground.Listener {
 
     private Context context = this;
-    private String altUserId;
     private EditText editTextMessage;
     private String currentUserId;
-    private ChatAdapter chatAdapter;
-    private List<Message> mChat;
+    private GroupMessageAdapter groupMessageAdapter;
+    private List<GroupMessage> mChat;
     private RecyclerView recyclerView;
     private FirebaseFirestore mFireBaseFireStore;
     private String currentUsername;
     private ImageView imageViewProfilePic;
     private TextView textViewUsername;
-    private Window window;
-    private View container;
     private Repository repository;
     private Foreground.Binding listenerBinding;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -112,12 +109,16 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
     private AutoCompleteTextView searchField;
     private String filePath;
     private String fileName;
+    private String uniqueId;
+    private String profilePicUrl;
+    private SharedPreferences sharedPreferences;
+    private Window window;
+    private View container;
+    private ConstraintLayout sendMessageContainer;
     private Toolbar toolbar;
     private ImageView imageViewBack;
-    private SharedPreferences sharedPreferences;
-    private ConstraintLayout sendMessageContainer;
-    private ImageView searchImageView;
     private ImageView backArrowImageView;
+    private ImageView searchImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,9 +128,9 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
         sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
         currentUsername = sharedPreferences.getString("username", "");
 
-        mFireBaseFireStore = FirebaseFirestore.getInstance();
-
         repository = new Repository(getApplication());
+
+        mFireBaseFireStore = FirebaseFirestore.getInstance();
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
@@ -151,6 +152,9 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
 
+        imageViewProfilePic = findViewById(R.id.image_view_profile_pic);
+        textViewUsername = findViewById(R.id.text_view_username);
+
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
@@ -168,8 +172,26 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.equals("")) {
-                    chatAdapter.getFilter().filter(s);
+                    groupMessageAdapter.getFilter().filter(s);
                 }
+            }
+        });
+
+        imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, GroupEditActivity.class);
+                i.putExtra("uniqueId", uniqueId);
+                startActivity(i);
+            }
+        });
+
+        textViewUsername.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, GroupEditActivity.class);
+                i.putExtra("uniqueId", uniqueId);
+                startActivity(i);
             }
         });
 
@@ -178,24 +200,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             @Override
             public void onClick(View v) {
                 onBackPressed();
-            }
-        });
-
-        imageViewProfilePic = findViewById(R.id.image_view_profile_pic);
-        imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(context, ProfileViewActivity.class);
-                startActivity(i);
-            }
-        });
-
-        textViewUsername = findViewById(R.id.text_view_username);
-        textViewUsername.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(context, ProfileViewActivity.class);
-                startActivity(i);
             }
         });
 
@@ -304,7 +308,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
                     getPermissionToWriteStorage();
                 } else {
                     new MaterialFilePicker()
-                            .withActivity(ChatActivity.this)
+                            .withActivity(GroupMessageActivity.this)
                             .withRequestCode(PICK_DOCUMENT_REQUEST)
                             .withHiddenFiles(true)
                             .start();
@@ -367,7 +371,9 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            altUserId = bundle.getString("userId");
+            String groupName = bundle.getString("groupName");
+            uniqueId = bundle.getString("uniqueId");
+            textViewUsername.setText(groupName);
         }
 
         ImageView imageViewSendMessage = findViewById(R.id.image_view_send_message);
@@ -381,6 +387,8 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
                 if (!message.equals("")) {
                     sendMessage(message);
+                } else {
+                    Toasty.info(context, "You cannot send blank messages", Toast.LENGTH_LONG, true).show();
                 }
                 editTextMessage.setText("");
             }
@@ -393,11 +401,10 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             lightMode();
         }
 
-        getChatUserData();
+        getGroupInfo();
         readMessages();
-        seenMessage();
-        updateToRead();
         searchSetup();
+        userDetailsOperations();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
     }
@@ -449,27 +456,39 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
         long timeStamp = System.currentTimeMillis();
         String messageId = Long.toString(timeStamp);
 
-        DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages").document(messageId);
-        chatPathCurrent.set(new Message(messageId, message, timeStamp, true, false, currentUserId, altUserId, currentUsername, true, "text", "", ""));
+        CollectionReference sharedListsRef = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId).collection("Participants");
+        sharedListsRef.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-        Map<String, Object> documentValidation = new HashMap<>();
-        documentValidation.put("Validate document", "This is a document");
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-        DocumentReference userInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId);
-        userInitialDocChatPath.set(documentValidation);
+                                GroupParticipant groupParticipant = document.toObject(GroupParticipant.class);
+                                String participantId = groupParticipant.getId();
 
-        DocumentReference chatPathAlt = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(messageId);
-        chatPathAlt.set(new Message(messageId, message, timeStamp, false, false, currentUserId, altUserId, currentUsername, false, "text", "", ""));
+                                if (participantId.equals(currentUserId)) {
 
-        DocumentReference altUserInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId);
-        altUserInitialDocChatPath.set(documentValidation);
+                                    DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                    chatPathCurrent.set(new GroupMessage(messageId, message, timeStamp, true, currentUserId, currentUsername, "text", "", "", profilePicUrl));
+
+                                } else {
+
+                                    DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                    chatPathCurrent.set(new GroupMessage(messageId, message, timeStamp, false, currentUserId, currentUsername, "text", "", "", profilePicUrl));
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
     private void readMessages() {
 
         mChat = new ArrayList<>();
 
-        CollectionReference usersPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages");
+        CollectionReference usersPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId).collection("Messages");
         usersPath.orderBy("timeStamp", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value,
@@ -482,99 +501,12 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
                 for (QueryDocumentSnapshot doc : value) {
 
-                    Message message = doc.toObject(Message.class);
+                    GroupMessage groupMessage = doc.toObject(GroupMessage.class);
 
-                    mChat.add(message);
+                    mChat.add(groupMessage);
 
-                    chatAdapter = new ChatAdapter(context, mChat, repository, sharedPreferences);
-                    recyclerView.setAdapter(chatAdapter);
-                }
-            }
-        });
-    }
-
-    private void seenMessage() {
-
-        CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages");
-        seenPath.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                DocumentReference messagePath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(document.getId());
-                                messagePath.update("seen", true);
-                            }
-                        }
-                    }
-                });
-    }
-
-    /*private void seenMessage() {
-
-        CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages");
-        seenListener = seenPath.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    return;
-                }
-
-                for (QueryDocumentSnapshot doc : value) {
-
-                    DocumentReference messagePath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(doc.getId());
-                    messagePath.update("seen", true);
-                }
-            }
-        });
-    }*/
-
-    private void updateToRead() {
-
-        CollectionReference seenPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages");
-        seenPath.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                DocumentReference messagePath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages").document(document.getId());
-                                messagePath.update("isRead", true);
-                            }
-                        }
-                    }
-                });
-    }
-
-    private void getChatUserData() {
-
-        repository.deleteChatUser();
-
-        DocumentReference chatUserRef = mFireBaseFireStore.collection("User").document(altUserId);
-        chatUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-
-                        User user = document.toObject(User.class);
-
-                        ChatUserEntity chatUserEntity = new ChatUserEntity(user.getId(), user.getUsername(), user.getProfilePicUrl(), user.getStatus(), user.getEmailAddress());
-                        repository.insert(chatUserEntity);
-
-                        textViewUsername.setText(user.getUsername());
-
-                        if (user.getProfilePicUrl() != null) {
-                            Picasso.get().load(user.getProfilePicUrl()).into(imageViewProfilePic);
-                        }
-
-                        chatAdapter = new ChatAdapter(context, mChat, repository, sharedPreferences);
-                        recyclerView.setAdapter(chatAdapter);
-                    }
+                    groupMessageAdapter = new GroupMessageAdapter(context, mChat, sharedPreferences);
+                    recyclerView.setAdapter(groupMessageAdapter);
                 }
             }
         });
@@ -588,18 +520,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
         startActivity(i);
         finish();
         hideKeyboard(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        currentUser(altUserId);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        currentUser("none");
     }
 
     @Override
@@ -618,14 +538,6 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
     public void onBecameBackground() {
         DocumentReference chatPath = mFireBaseFireStore.collection("User").document(currentUserId);
         chatPath.update("onlineOffline", "offline");
-    }
-
-    private void currentUser(String userId) {
-
-        SharedPreferences myPrefs = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = myPrefs.edit();
-        prefsEditor.putString("chatUserId", userId);
-        prefsEditor.apply();
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -737,20 +649,31 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
                             long timeStamp = System.currentTimeMillis();
                             String messageId = Long.toString(timeStamp);
 
-                            DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages").document(messageId);
-                            chatPathCurrent.set(new Message(messageId, "", timeStamp, true, false, currentUserId, altUserId, currentUsername, true, "image", imageUrl, messageId));
+                            CollectionReference sharedListsRef = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId).collection("Participants");
+                            sharedListsRef.get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
 
-                            Map<String, Object> documentValidation = new HashMap<>();
-                            documentValidation.put("Validate document", "This is a document");
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
 
-                            DocumentReference userInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId);
-                            userInitialDocChatPath.set(documentValidation);
+                                                    GroupParticipant groupParticipant = document.toObject(GroupParticipant.class);
+                                                    String participantId = groupParticipant.getId();
 
-                            DocumentReference chatPathAlt = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(messageId);
-                            chatPathAlt.set(new Message(messageId, "", timeStamp, false, false, currentUserId, altUserId, currentUsername, false, "image", imageUrl, messageId));
+                                                    if (participantId.equals(currentUserId)) {
 
-                            DocumentReference altUserInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId);
-                            altUserInitialDocChatPath.set(documentValidation);
+                                                        DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                                        chatPathCurrent.set(new GroupMessage(messageId, "", timeStamp, true, currentUserId, currentUsername, "image", imageUrl, messageId, profilePicUrl));
+                                                    } else {
+
+                                                        DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                                        chatPathCurrent.set(new GroupMessage(messageId, "", timeStamp, false, currentUserId, currentUsername, "image", imageUrl, messageId, profilePicUrl));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
                         }
                     }
                 });
@@ -836,11 +759,13 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
         new AlertDialog.Builder(context)
                 .setTitle("Permission needed to access Camera")
-                .setMessage("This permission is needed in order to take a photo immediately for use in Notes. Manually enable in Settings > Apps & notifications > Hive > Permissions.")
+                .setMessage("This permission is needed in order to take a photo immediately for use in Notes. Manually enable in Settings > Apps & notifications > myTAC > Permissions.")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_USE_CAMERA_REQUEST);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_USE_CAMERA_REQUEST);
+                        }
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -853,11 +778,13 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
         new AlertDialog.Builder(context)
                 .setTitle("Permission needed to Write to External Storage")
-                .setMessage("This permission is needed in order save images taken with the camera when accessed by the App. Manually enable in Settings > Apps & notifications > Hive > Permissions.")
+                .setMessage("This permission is needed in order save images taken with the camera when accessed by the App. Manually enable in Settings > Apps & notifications > myTAC > Permissions.")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST);
+                        }
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -885,7 +812,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toasty.success(context, "External storage permission granted", Toast.LENGTH_LONG, true).show();
             } else {
-                Toasty.error(context, "External storage permission denied", Toast.LENGTH_LONG, true).show();
+                Toasty.error(context, "External storage permission denied", Toast.LENGTH_LONG,true).show();
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -900,7 +827,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
             if (photoFile != null) {
                 pathToFile = photoFile.getAbsolutePath();
-                Uri photoURI = FileProvider.getUriForFile(context, "com.nullparams.hive.fileprovider", photoFile);
+                Uri photoURI = FileProvider.getUriForFile(context, "me.redditech.mytac.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
@@ -936,7 +863,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
 
         repository.deleteAllMessages();
 
-        CollectionReference messagesPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages");
+        CollectionReference messagesPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId).collection("Messages");
         messagesPath.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -986,20 +913,31 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
                                 long timeStamp = System.currentTimeMillis();
                                 String messageId = Long.toString(timeStamp);
 
-                                DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId).collection("Messages").document(messageId);
-                                chatPathCurrent.set(new Message(messageId, "", timeStamp, true, false, currentUserId, altUserId, currentUsername, true, "attachment", imageUrl, messageId));
+                                CollectionReference sharedListsRef = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId).collection("Participants");
+                                sharedListsRef.get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
 
-                                Map<String, Object> documentValidation = new HashMap<>();
-                                documentValidation.put("Validate document", "This is a document");
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
 
-                                DocumentReference userInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Single").document(altUserId);
-                                userInitialDocChatPath.set(documentValidation);
+                                                        GroupParticipant groupParticipant = document.toObject(GroupParticipant.class);
+                                                        String participantId = groupParticipant.getId();
 
-                                DocumentReference chatPathAlt = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId).collection("Messages").document(messageId);
-                                chatPathAlt.set(new Message(messageId, "", timeStamp, false, false, currentUserId, altUserId, currentUsername, false, "attachment", imageUrl, messageId));
+                                                        if (participantId.equals(currentUserId)) {
 
-                                DocumentReference altUserInitialDocChatPath = mFireBaseFireStore.collection("Chats").document(altUserId).collection("Single").document(currentUserId);
-                                altUserInitialDocChatPath.set(documentValidation);
+                                                            DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                                            chatPathCurrent.set(new GroupMessage(messageId, "", timeStamp, true, currentUserId, currentUsername, "attachment", imageUrl, messageId, profilePicUrl));
+                                                        } else {
+
+                                                            DocumentReference chatPathCurrent = mFireBaseFireStore.collection("Chats").document(participantId).collection("Groups").document(uniqueId).collection("Messages").document(messageId);
+                                                            chatPathCurrent.set(new GroupMessage(messageId, "", timeStamp, false, currentUserId, currentUsername, "attachment", imageUrl, messageId, profilePicUrl));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
                             }
                         }
                     });
@@ -1009,5 +947,52 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
         thread.start();
+    }
+
+    private void getGroupInfo() {
+
+        DocumentReference currentUserRef = mFireBaseFireStore.collection("Chats").document(currentUserId).collection("Groups").document(uniqueId);
+        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+
+                        Group group = document.toObject(Group.class);
+
+                        textViewUsername.setText(group.getGroupName());
+
+                        if (group.getGroupPicUrl() != null) {
+                            Picasso.get().load(group.getGroupPicUrl()).into(imageViewProfilePic);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getGroupInfo();
+    }
+
+    private void userDetailsOperations() {
+
+        DocumentReference currentUserRef = mFireBaseFireStore.collection("User").document(currentUserId);
+        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+
+                        User user = document.toObject(User.class);
+                        profilePicUrl = user.getProfilePicUrl();
+                    }
+                }
+            }
+        });
     }
 }

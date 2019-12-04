@@ -60,4 +60,28 @@
         app:layout_constraintEnd_toEndOf="@+id/profile_pic"
         app:layout_constraintStart_toStartOf="@+id/profile_pic" />
 
+    <ImageView
+        android:id="@+id/image_view_contact_select"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="16dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/textview_username"
+        app:layout_constraintStart_toEndOf="@+id/textview_username"
+        app:layout_constraintTop_toTopOf="@+id/textview_username"
+        app:srcCompat="@drawable/fui_ic_check_circle_black_128dp" />
+
+    <TextView
+        android:id="@+id/text_view_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="Admin"
+        android:textColor="@color/Accent"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/textview_username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textview_username" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

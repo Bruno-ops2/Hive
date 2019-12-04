@@ -16,6 +16,7 @@
         android:id="@+id/show_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:layout_below="@id/show_username"
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/profile_pic"
         android:adjustViewBounds="true"
@@ -24,6 +25,18 @@
         android:padding="8dp"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/ic_attach_black" />
+
+    <TextView
+        android:id="@+id/show_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/profile_pic"
+        android:padding="8dp"
+        android:text="username"
+        android:textColor="@color/PrimaryDark"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/show_message"

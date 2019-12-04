@@ -11,15 +11,21 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -37,8 +43,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.nullparams.hive.database.RecentSearchesEntity;
 import com.nullparams.hive.database.UserEntity;
 import com.nullparams.hive.fragments.ChatsFragment;
+import com.nullparams.hive.fragments.GroupsFragment;
 import com.nullparams.hive.fragments.ProfileFragment;
 import com.nullparams.hive.fragments.UsersFragment;
 import com.nullparams.hive.models.User;
@@ -46,7 +54,9 @@ import com.nullparams.hive.repository.Repository;
 import com.sjl.foreground.Foreground;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
@@ -65,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
     private BottomNavigationView bottomNav;
     private static final int PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST = 13;
     private Toolbar toolbar;
+    private AutoCompleteTextView searchField;
+    private ArrayList<String> searchSuggestions = new ArrayList<>();
+    private List<RecentSearchesEntity> recentSearchesList = new ArrayList<>();
+    private ArrayList<String> recentSearchesStringArrayList = new ArrayList<>();
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -76,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                         case R.id.navigation_chats:
                             selectedFragment = new ChatsFragment();
                             textViewFragmentTitle.setText("Chats ");
+                            break;
+                        case R.id.navigation_groups:
+                            selectedFragment = new GroupsFragment();
+                            textViewFragmentTitle.setText("Groups");
                             break;
                         case R.id.navigation_users:
                             selectedFragment = new UsersFragment();
@@ -132,7 +150,23 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         bottomNav.setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_SELECTED);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
+        searchField = findViewById(R.id.searchField);
+        searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    search();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
+                android.R.layout.simple_list_item_1, searchSuggestions);
+        searchField.setAdapter(adapter);
+
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -143,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         unreadMessages();
         registerToken();
         searchSetup();
+        setupSearchSuggestions();
 
         listenerBinding = Foreground.get(getApplication()).addListener(this);
     }
@@ -329,5 +364,64 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                         }
                     }
                 });
+    }
+
+    private void setupSearchSuggestions() {
+
+        searchSuggestions.clear();
+
+        CollectionReference userListReference = mFireBaseFireStore.collection("User");
+        userListReference.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                User user = document.toObject(User.class);
+
+                                if (!user.getId().equals(mCurrentUserId)) {
+                                    searchSuggestions.add(user.getUsername());
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void search() {
+
+        String searchTerm = searchField.getText().toString().trim().toLowerCase();
+
+        recentSearchesList.clear();
+        recentSearchesStringArrayList.clear();
+
+        Repository repository = new Repository(getApplication());
+        recentSearchesList = repository.getRecentSearches();
+
+        for (RecentSearchesEntity recentSearches : recentSearchesList) {
+            String recentSearchesListString = recentSearches.getSearchTerm();
+            recentSearchesStringArrayList.add(recentSearchesListString);
+        }
+
+        if (!recentSearchesStringArrayList.contains(searchTerm) && !searchTerm.equals("")) {
+            long timeStamp = System.currentTimeMillis();
+            RecentSearchesEntity recentSearches = new RecentSearchesEntity(timeStamp, searchTerm);
+            repository.insert(recentSearches);
+
+        } else if (recentSearchesStringArrayList.contains(searchTerm)) {
+            long timeStampQuery = repository.getTimeStamp(searchTerm);
+            RecentSearchesEntity recentSearchesOld = new RecentSearchesEntity(timeStampQuery, searchTerm);
+            repository.delete(recentSearchesOld);
+
+            long timeStamp = System.currentTimeMillis();
+            RecentSearchesEntity recentSearchesNew = new RecentSearchesEntity(timeStamp, searchTerm);
+            repository.insert(recentSearchesNew);
+        }
+
+        Intent i = new Intent(context, SearchActivity.class);
+        i.putExtra("searchTerm", searchTerm);
+        i.putExtra("searchSuggestions", searchSuggestions);
+        startActivity(i);
     }
 }

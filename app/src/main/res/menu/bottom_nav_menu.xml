@@ -5,12 +5,14 @@
         android:id="@+id/navigation_chats"
         android:icon="@drawable/ic_chat"
         android:title="" />
-
+    <item
+        android:id="@+id/navigation_groups"
+        android:icon="@drawable/ic_group"
+        android:title="" />
     <item
         android:id="@+id/navigation_users"
         android:icon="@drawable/ic_users"
         android:title="" />
-
     <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_account"
