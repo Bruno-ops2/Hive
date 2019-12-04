@@ -11,3 +11,4 @@ Features
 - Dark/light mode
 - Push notifications for messages
 - Search users or messages
+- Group chat
