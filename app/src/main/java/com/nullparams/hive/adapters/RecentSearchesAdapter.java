@@ -55,7 +55,7 @@ public class RecentSearchesAdapter extends RecyclerView.Adapter<RecentSearchesAd
         this.recentSearchesList = recentSearchesList;
         this.listener = listener;
         this.context = context;
-        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
     }
 
     @NonNull

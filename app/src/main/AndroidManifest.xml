@@ -18,7 +18,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/NoActionBar">
-        <activity android:name=".AddUsersActivity"></activity>
         <activity
             android:name=".RegisterActivity"
             android:screenOrientation="portrait"
@@ -76,6 +75,9 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".CreateGroupActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".AddUsersActivity"
             android:windowSoftInputMode="stateHidden" />
 
         <service

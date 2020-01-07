@@ -1,5 +1,9 @@
 <resources>
-
     <string name="app_name">Hive</string>
 
+    <string name="rate_dialog_title">Rate Hive</string>
+    <string name="rate_dialog_message">Enjoying Hive? Please support us by taking a moment to rate the app. Best, Hive team.</string>
+    <string name="rate_dialog_ok">Rate Now</string>
+    <string name="rate_dialog_cancel">Remind Me Later</string>
+    <string name="rate_dialog_no">No Thanks</string>
 </resources>

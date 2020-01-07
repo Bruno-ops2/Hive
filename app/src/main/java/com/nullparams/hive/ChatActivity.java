@@ -386,7 +386,7 @@ public class ChatActivity extends AppCompatActivity implements Foreground.Listen
             }
         });
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

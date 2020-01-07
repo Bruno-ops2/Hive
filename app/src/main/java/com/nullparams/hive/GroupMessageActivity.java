@@ -394,7 +394,7 @@ public class GroupMessageActivity extends AppCompatActivity implements Foregroun
             }
         });
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

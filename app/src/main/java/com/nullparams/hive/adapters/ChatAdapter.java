@@ -57,7 +57,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> im
         this.mChat = mChat;
         mChatFull = new ArrayList<>(mChat);
         this.repository = repository;
-        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
     }
 
     @NonNull

@@ -102,7 +102,7 @@ public class GroupsFragment extends Fragment {
         layout = view.findViewById(R.id.container);
 
         sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
+import hotchemi.android.rate.AppRate;
 
 public class MainActivity extends AppCompatActivity implements Foreground.Listener {
 
@@ -114,6 +115,13 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        AppRate.with(this)
+                .setInstallDays(7)
+                .setLaunchTimes(5)
+                .setRemindInterval(2)
+                .monitor();
+        AppRate.showRateDialogIfMeetsConditions(this);
+
         SharedPreferences sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -166,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements Foreground.Listen
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

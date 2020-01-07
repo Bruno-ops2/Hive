@@ -101,7 +101,7 @@ public class ProfileFragment extends Fragment {
         window = getActivity().getWindow();
 
         sharedPreferences = context.getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
 
         repository = new Repository(getActivity().getApplication());
 

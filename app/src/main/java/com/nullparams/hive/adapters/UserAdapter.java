@@ -68,7 +68,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         this.mContext = mContext;
         this.mUsers = mUsers;
         this.isChat = isChat;
-        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         this.isCreateGroup = isCreateGroup;
         this.listener = listener;
         this.isGroupEdit = isGroupEdit;
@@ -98,6 +98,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
         if (user.getProfilePicUrl() != null) {
             Picasso.get().load(user.getProfilePicUrl()).into(holder.profilePic);
+        } else {
+            Picasso.get().load(R.drawable.empty_profile_pic).into(holder.profilePic);
         }
 
         if (user.getOnlineOffline().equals("online")) {

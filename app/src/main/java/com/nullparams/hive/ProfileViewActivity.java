@@ -59,7 +59,7 @@ public class ProfileViewActivity extends AppCompatActivity {
             Picasso.get().load(profilePicUrl).into(imageViewProfilePic);
         }
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

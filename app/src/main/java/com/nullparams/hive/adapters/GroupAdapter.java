@@ -29,7 +29,7 @@ public class GroupAdapter extends FirestoreRecyclerAdapter<Group, GroupAdapter.L
     public GroupAdapter(@NonNull FirestoreRecyclerOptions<Group> options, SharedPreferences sharedPreferences, Context context) {
         super(options);
 
-        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         mContext = context;
     }
 

@@ -129,7 +129,7 @@ public class SearchActivity extends AppCompatActivity implements Foreground.List
                 android.R.layout.simple_list_item_1, searchSuggestions);
         searchField.setAdapter(adapter);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

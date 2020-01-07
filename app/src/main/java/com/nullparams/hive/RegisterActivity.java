@@ -153,7 +153,7 @@ public class RegisterActivity extends AppCompatActivity {
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {
@@ -280,10 +280,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "Available", mCurrentUserEmail));
-
-                            DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userPath.update("onlineOffline", "online");
+                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "online", "Available", mCurrentUserEmail));
 
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -325,10 +322,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "offline", "Available", mCurrentUserEmail));
-
-                            DocumentReference userPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
-                            userPath.update("onlineOffline", "online");
+                            userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "online", "Available", mCurrentUserEmail));
 
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

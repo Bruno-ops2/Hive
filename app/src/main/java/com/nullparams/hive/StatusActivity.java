@@ -68,7 +68,7 @@ public class StatusActivity extends AppCompatActivity implements Foreground.List
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

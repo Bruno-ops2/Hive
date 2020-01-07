@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -74,7 +75,7 @@ public class UserNameActivity extends AppCompatActivity implements Foreground.Li
         window = this.getWindow();
         container = findViewById(R.id.container2);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

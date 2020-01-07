@@ -106,7 +106,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         window = this.getWindow();
         container = findViewById(R.id.container);
 
-        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        boolean darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
         if (darkModeOn) {
             darkMode();
         } else {

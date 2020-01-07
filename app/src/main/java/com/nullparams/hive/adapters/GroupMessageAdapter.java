@@ -53,7 +53,7 @@ public class GroupMessageAdapter extends RecyclerView.Adapter<GroupMessageAdapte
         this.mContext = mContext;
         this.mChat = mChat;
         mChatFull = new ArrayList<>(mChat);
-        darkModeOn = sharedPreferences.getBoolean("darkModeOn", true);
+        darkModeOn = sharedPreferences.getBoolean("darkModeOn", false);
     }
 
     @NonNull
