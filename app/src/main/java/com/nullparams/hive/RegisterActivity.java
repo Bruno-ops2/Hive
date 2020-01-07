@@ -24,18 +24,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.nullparams.hive.models.User;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -282,6 +287,8 @@ public class RegisterActivity extends AppCompatActivity {
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "online", "Available", mCurrentUserEmail));
 
+                            registerToken();
+
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(i);
@@ -324,6 +331,8 @@ public class RegisterActivity extends AppCompatActivity {
                             DocumentReference userDetailsPath = mFireBaseFireStore.collection("User").document(mCurrentUserId);
                             userDetailsPath.set(new User(mCurrentUserId, "user" + randomNumber, null, "online", "Available", mCurrentUserEmail));
 
+                            registerToken();
+
                             Intent i = new Intent(context, MainActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(i);
@@ -361,6 +370,22 @@ public class RegisterActivity extends AppCompatActivity {
         if (imm != null) {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    private void registerToken() {
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String deviceToken = instanceIdResult.getToken();
+
+                Map<String, Object> userToken = new HashMap<>();
+                userToken.put("User_Token_ID", deviceToken);
+
+                DocumentReference userTokenPath = mFireBaseFireStore.collection("User").document(mCurrentUserId).collection("Tokens").document("User_Token");
+                userTokenPath.set(userToken);
+            }
+        });
     }
 }
 
